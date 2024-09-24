@@ -1,0 +1,67 @@
+/* Add your custom styles here */
+
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+    padding-top: 70px;
+}
+
+header {
+    background-color: #333;
+    color: #fff;
+    padding: 15px;
+    text-align: center;
+}
+
+nav a {
+    color: #fff;
+    padding: 15px;
+    text-decoration: none;
+}
+
+.property-listings {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.property-listings .property {
+    border: 1px solid #ccc;
+    padding: 20px;
+    margin: 10px;
+}
+
+
+.property-card {
+    margin-bottom: 30px;
+}
+
+/* Custom Navbar Styles */
+.navbar-brand {
+    font-weight: bold;
+    font-size: 1.5rem;
+}
+
+/* Property Card Styles */
+.property-card img {
+    height: 200px;
+    object-fit: cover;
+}
+
+.property-card .card-body {
+    display: flex;
+    flex-direction: column;
+}
+
+.property-card .btn {
+    margin-top: auto;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .property-card img {
+        height: 150px;
+    }
+}

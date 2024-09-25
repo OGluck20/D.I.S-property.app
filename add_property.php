@@ -71,7 +71,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $admin_phone = '+2349046741088'; // Replace with the actual admin phone number
             $whatsapp_message = "A new property has been added.\n\n"
                 . "Title: $title\n"
-                . "Price: $$price\n"
+                . "Price: ₦$price\n"
                 . "Address: $address\n"
                 . "Purchase Code: $purchase_code";
 

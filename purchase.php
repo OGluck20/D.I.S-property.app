@@ -37,7 +37,7 @@ if ($property['status'] !== 'available') {
 }
 
 // Set up WhatsApp redirection
-$admin_phone = getenv('ADMIN_WHATSAPP_NUMBER'); // Fetch from environment variable
+$admin_phone = getenv('+2349046741088'); // Fetch from environment variable
 $whatsapp_message = "Property Inquiry:\n\n"
     . "Title: " . htmlspecialchars($property['title']) . "\n"
     . "Price: $" . number_format($property['price'], 2) . "\n"

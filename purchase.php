@@ -36,14 +36,22 @@ if ($property['status'] !== 'available') {
     exit();
 }
 
-// Set up WhatsApp redirection
-$admin_phone = getenv('+2349046741088'); // Fetch from environment variable
-$whatsapp_message = "Property Inquiry:\n\n"
-    . "Title: " . htmlspecialchars($property['title']) . "\n"
-    . "Price: $" . number_format($property['price'], 2) . "\n"
-    . "Description: " . htmlspecialchars($property['description']);
-$whatsapp_message_encoded = urlencode($whatsapp_message);
-$whatsapp_url = "https://wa.me/$admin_phone?text=$whatsapp_message_encoded";
+    // Set up WhatsApp redirection
+    $admin_phone = '+2349035286982'; // Fetch from environment variable correctly
+
+    // Check if the environment variable is correctly set
+    if (!$admin_phone) {
+        echo "Admin phone number not found in environment variables.";
+    }
+
+    $whatsapp_message = "Property Inquiry:\n\n"
+        . "Title: " . htmlspecialchars($property['title']) . "\n"
+        . "Price: ₦" . number_format($property['price'], 2) . "\n"
+        . "Description: " . htmlspecialchars($property['description']);
+
+    $whatsapp_message_encoded = urlencode($whatsapp_message);
+    $whatsapp_url = "https://wa.me/$admin_phone?text=$whatsapp_message_encoded";
+
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $entered_code = trim($_POST['purchase_code']);

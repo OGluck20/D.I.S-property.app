@@ -19,6 +19,7 @@ if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
 $property_id = intval($_GET['id']);
 $errors = [];
 
+// Fetch property and user data
 $stmt = $conn->prepare("SELECT properties.*, users.username FROM properties JOIN users ON properties.user_id = users.id WHERE properties.id = ?");
 $stmt->bindParam(1, $property_id, PDO::PARAM_INT);
 $stmt->execute();
@@ -36,27 +37,21 @@ if ($property['status'] !== 'available') {
     exit();
 }
 
-    // Set up WhatsApp redirection
-    $admin_phone = '+2349035286982'; // Fetch from environment variable correctly
+// WhatsApp redirection
+$admin_phone = '+2349035286982'; // Ensure the admin phone is set correctly
 
-    // Check if the environment variable is correctly set
-    if (!$admin_phone) {
-        echo "Admin phone number not found in environment variables.";
-    }
+$whatsapp_message = "Property Inquiry:\n\n"
+    . "Title: " . htmlspecialchars($property['title']) . "\n"
+    . "Price: ₦" . number_format($property['price'], 2) . "\n"
+    . "Description: " . htmlspecialchars($property['description']);
 
-    $whatsapp_message = "Property Inquiry:\n\n"
-        . "Title: " . htmlspecialchars($property['title']) . "\n"
-        . "Price: ₦" . number_format($property['price'], 2) . "\n"
-        . "Description: " . htmlspecialchars($property['description']);
+$whatsapp_message_encoded = urlencode($whatsapp_message);
+$whatsapp_url = "https://wa.me/$admin_phone?text=$whatsapp_message_encoded";
 
-    $whatsapp_message_encoded = urlencode($whatsapp_message);
-    $whatsapp_url = "https://wa.me/$admin_phone?text=$whatsapp_message_encoded";
-
-
+// Process form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $entered_code = trim($_POST['purchase_code']);
 
-    // Verify the entered purchase code
     if ($entered_code === $property['purchase_code']) {
         $buyer_id = $_SESSION['user_id'];
         $seller_id = $property['user_id'];
@@ -74,7 +69,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $update_stmt->bindParam(1, $property_id, PDO::PARAM_INT);
             $update_stmt->execute();
 
-            // Redirect to success page (no WhatsApp redirect now)
             echo "<div class='container'><div class='alert alert-success'><h3>Purchase Successful!</h3><p>You have successfully purchased the property.</p></div></div>";
         } else {
             $errors[] = "Failed to process the purchase. Please try again.";
@@ -85,7 +79,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 ?>
 <style>
-    .container{
+    .container {
         padding: 30px 20px;
         height: 82vh;
         margin-top: 2%;
@@ -94,7 +88,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     @media (max-width: 480px) {
-        .container{
+        .container {
             margin-top: 2%;
             margin-bottom: 5%;
             overflow-y: scroll;
@@ -103,17 +97,70 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
-    img{
-        height: 60%;
-        aspect-ratio: 1;
+    /* Responsive media styling */
+    img, video {
+        max-width: 100%; /* Ensure the media doesn't exceed the container width */
+        height: auto; /* Maintain the aspect ratio */
+        object-fit: cover; /* Ensure the media fits nicely */
+    }
+
+    /* Full-screen modal styling */
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.9);
+    }
+
+    .modal-content {
+        margin: 15% auto;
+        width: 80%;
+        max-width: 700px;
+    }
+
+    .close {
+        position: absolute;
+        top: 10px;
+        right: 25px;
+        color: white;
+        font-size: 35px;
+        font-weight: bold;
+    }
+
+    .close:hover {
+        color: #999;
     }
 </style>
-<!-- HTML Form to input the purchase code -->
+
 <div class="container">
     <h2>Purchase Property</h2>
     <h4><?php echo htmlspecialchars($property['title']); ?></h4>
-    <img src="uploads/<?php echo htmlspecialchars($property['image']); ?>" class="card-img-top" alt="<?php echo htmlspecialchars($property['title']); ?>" style="width: 320px; height: auto;">
-    <p><strong>Price:</strong> $<?php echo number_format($property['price'], 2); ?></p>
+
+    <!-- Display image or video -->
+    <?php
+    $media_ext = strtolower(pathinfo($property['media'], PATHINFO_EXTENSION));
+    $is_image = in_array($media_ext, ['jpg', 'jpeg', 'png', 'gif']);
+    $is_video = in_array($media_ext, ['mp4', 'webm', 'ogg']);
+    ?>
+
+    <div style="cursor: pointer;" onclick="openModal('uploads/<?php echo htmlspecialchars($property['media']); ?>', '<?php echo $media_ext; ?>')">
+        <?php if ($is_image): ?>
+            <img src="uploads/<?php echo htmlspecialchars($property['media']); ?>" alt="<?php echo htmlspecialchars($property['title']); ?>">
+        <?php elseif ($is_video): ?>
+            <video controls>
+                <source src="uploads/<?php echo htmlspecialchars($property['media']); ?>" type="video/<?php echo $media_ext; ?>">
+                Your browser does not support the video tag.
+            </video>
+        <?php else: ?>
+            <img src="https://via.placeholder.com/350x200" alt="No Media Available">
+        <?php endif; ?>
+    </div>
+
+    <p><strong>Price:</strong> ₦<?php echo number_format($property['price'], 2); ?></p>
     <p><strong>Description:</strong> <?php echo htmlspecialchars($property['description']); ?></p>
 
     <?php if (!empty($errors)): ?>
@@ -139,3 +186,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </div>
 
 <?php include 'includes/footer.php'; ?>
+
+<!-- Modal for previewing media -->
+<div id="mediaModal" class="modal">
+    <span class="close" onclick="closeModal()">&times;</span>
+    <div class="modal-content" id="modalMediaContent"></div>
+</div>
+
+<script>
+    function openModal(mediaSrc, mediaType) {
+        var modal = document.getElementById("mediaModal");
+        var mediaContent = document.getElementById("modalMediaContent");
+
+        if (['jpg', 'jpeg', 'png', 'gif'].includes(mediaType)) {
+            mediaContent.innerHTML = '<img src="' + mediaSrc + '" style="width: 100%;">';
+        } else if (['mp4', 'webm', 'ogg'].includes(mediaType)) {
+            mediaContent.innerHTML = '<video controls style="width: 100%;"><source src="' + mediaSrc + '" type="video/' + mediaType + '"></video>';
+        }
+
+        modal.style.display = "block";
+    }
+
+    function closeModal() {
+        document.getElementById("mediaModal").style.display = "none";
+    }
+</script>

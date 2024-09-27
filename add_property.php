@@ -28,30 +28,39 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Generate a unique purchase code for the property
     $purchase_code = uniqid('purchase_');
 
-    // Handle image upload logic here...
-    if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
-        $image = $_FILES['image'];
-        $image_name = $image['name'];
-        $image_tmp = $image['tmp_name'];
-        $image_ext = pathinfo($image_name, PATHINFO_EXTENSION);
+    // Handle file upload (either image or video)
+    if (isset($_FILES['media']) && $_FILES['media']['error'] === UPLOAD_ERR_OK) {
+        $file = $_FILES['media'];
+        $file_name = $file['name'];
+        $file_tmp = $file['tmp_name'];
+        $file_ext = strtolower(pathinfo($file_name, PATHINFO_EXTENSION));
 
-        // Generate a new unique filename to avoid collisions
-        $new_filename = uniqid('property_', true) . '.' . $image_ext;
+        // Check if the file is an image or a video (by MIME type)
+        $allowed_image_types = ['image/jpeg', 'image/png', 'image/gif'];
+        $allowed_video_types = ['video/mp4', 'video/webm', 'video/ogg'];
+        $file_mime = mime_content_type($file_tmp);
 
-        // Specify the directory to save the image
-        $upload_dir = 'uploads/';
+        if (in_array($file_mime, $allowed_image_types) || in_array($file_mime, $allowed_video_types)) {
+            // Generate a new unique filename
+            $new_filename = uniqid('property_', true) . '.' . $file_ext;
 
-        // Move the file to the destination directory
-        if (!move_uploaded_file($image_tmp, $upload_dir . $new_filename)) {
-            $errors[] = "Failed to upload image.";
+            // Specify the directory to save the file
+            $upload_dir = 'uploads/';
+
+            // Move the file to the destination directory
+            if (!move_uploaded_file($file_tmp, $upload_dir . $new_filename)) {
+                $errors[] = "Failed to upload media file.";
+            }
+        } else {
+            $errors[] = "Only image (jpeg, png, gif) and video (mp4, webm, ogg) formats are allowed.";
         }
     } else {
-        $errors[] = "No image uploaded or upload failed.";
+        $errors[] = "No media file uploaded or upload failed.";
     }
 
     if (empty($errors)) {
         // Prepare the SQL statement
-        $stmt = $conn->prepare("INSERT INTO properties (user_id, title, description, price, address, city, state, zip_code, image, purchase_code) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        $stmt = $conn->prepare("INSERT INTO properties (user_id, title, description, price, address, city, state, zip_code, media, purchase_code) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
 
         // Bind parameters
         $stmt->bindParam(1, $_SESSION['user_id']);
@@ -73,7 +82,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 . "Title: $title\n"
                 . "Price: ₦$price\n"
                 . "Address: $address\n"
-                . "Purchase Code: $purchase_code";
+                . "Purchase Code: $purchase_code\n"
+                . "Media: uploads/$new_filename"; // Add the media file path
 
             // URL encode the message
             $whatsapp_message_encoded = urlencode($whatsapp_message);
@@ -98,15 +108,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <div class="container">
     <h2>Add Property</h2>
-    <?php if(!empty($errors)): ?>
+    <?php if (!empty($errors)): ?>
         <div class="alert alert-danger">
             <ul>
-                <?php foreach($errors as $error): ?>
+                <?php foreach ($errors as $error): ?>
                     <li><?php echo htmlspecialchars($error); ?></li>
                 <?php endforeach; ?>
             </ul>
         </div>
-    <?php elseif(isset($_GET['success'])): ?>
+    <?php elseif (isset($_GET['success'])): ?>
         <div class="alert alert-success">
             <?php echo htmlspecialchars($_GET['success']); ?>
         </div>
@@ -141,8 +151,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <input type="text" class="form-control" id="zip_code" name="zip_code" value="<?php echo htmlspecialchars($zip_code); ?>">
         </div>
         <div class="mb-3">
-            <label for="image" class="form-label">Property Image</label>
-            <input type="file" class="form-control" id="image" name="image" accept="image/*">
+            <label for="media" class="form-label">Property Media (Image/Video)</label>
+            <input type="file" class="form-control" id="media" name="media" accept="image/*,video/*">
         </div>
         <button type="submit" class="btn btn-primary">Add Property</button>
     </form>

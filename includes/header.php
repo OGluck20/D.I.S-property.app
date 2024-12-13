@@ -6,7 +6,7 @@ session_start();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Real Estate Website</title>
+    <title>DIS Groups</title>
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Custom CSS -->
@@ -14,22 +14,31 @@ session_start();
 </head>
 <body>
     <!-- Navigation Bar -->
-     <style>
-        .container-fluid{
-            background-color: #ffff3f;
+    <style>
+        .container-fluid {
+            background-color: #4CAF50; /* Green color */
             margin-top: -8px;
             padding: 15px 10px;
         }
 
-        .navbar{
-            background-color: #ffff3f;
+        .navbar {
+            background-color: #4CAF50; /* Green color */
         }
 
-        .navbar-brand{
+        .navbar-brand {
             font-size: 40px;
             margin-left: 20px;
+            color: white; /* White text for contrast */
         }
-     </style>
+
+        .navbar-nav .nav-link {
+            color: white; /* White text for links */
+        }
+
+        .navbar-nav .nav-link:hover {
+            color: #e0e0e0; /* Light gray on hover */
+        }
+    </style>
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
         <div class="container-fluid">
             <a class="navbar-brand" href="index.php">D.I.S</a>

@@ -104,6 +104,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     .container {
         padding: 30px 20px;
     }
+
+    .form-label {
+        font-weight: bold; /* Bold labels */
+    }
+
+    .alert {
+        margin-bottom: 20px; /* Space between alerts and form */
+    }
+
+    .btn-primary {
+        background-color: #007bff; /* Bootstrap primary color */
+        border: none; /* Remove border */
+    }
+
+    .btn-primary:hover {
+        background-color: #0056b3; /* Darker blue on hover */
+    }
 </style>
 
 <div class="container">
@@ -124,31 +141,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <form action="add_property.php" method="POST" enctype="multipart/form-data">
         <div class="mb-3">
             <label for="title" class="form-label">Property Title</label>
-            <input type="text" class="form-control" id="title" name="title" value="<?php echo htmlspecialchars($title); ?>">
+            <input type="text" class="form-control" id="title" name="title" value="<?php echo htmlspecialchars($title); ?>" required>
         </div>
         <div class="mb-3">
             <label for="description" class="form-label">Property Description</label>
-            <textarea class="form-control" id="description" name="description" rows="5"><?php echo htmlspecialchars($description); ?></textarea>
+            <textarea class="form-control" id="description" name="description" rows="5" required><?php echo htmlspecialchars($description); ?></textarea>
         </div>
         <div class="mb-3">
             <label for="price" class="form-label">Price (₦)</label>
-            <input type="number" step="0.01" class="form-control" id="price" name="price" value="<?php echo htmlspecialchars($price); ?>">
+            <input type="number" step="0.01" class="form-control" id="price" name="price" value="<?php echo htmlspecialchars($price); ?>" required>
         </div>
         <div class="mb-3">
             <label for="address" class="form-label">Address</label>
-            <input type="text" class="form-control" id="address" name="address" value="<?php echo htmlspecialchars($address); ?>">
+            <input type="text" class="form-control" id="address" name="address" value="<?php echo htmlspecialchars($address); ?>" required>
         </div>
         <div class="mb-3">
             <label for="city" class="form-label">City</label>
-            <input type="text" class="form-control" id="city" name="city" value="<?php echo htmlspecialchars($city); ?>">
+            <input type="text" class="form-control" id="city" name="city" value="<?php echo htmlspecialchars($city); ?>" required>
         </div>
         <div class="mb-3">
             <label for="state" class="form-label">State</label>
-            <input type="text" class="form-control" id="state" name="state" value="<?php echo htmlspecialchars($state); ?>">
+            <input type="text" class="form-control" id="state" name="state" value="<?php echo htmlspecialchars($state); ?>" required>
         </div>
         <div class="mb-3">
             <label for="zip_code" class="form-label">Zip Code</label>
-            <input type="text" class="form-control" id="zip_code" name="zip_code" value="<?php echo htmlspecialchars($zip_code); ?>">
+            <input type="text" class="form-control" id="zip_code" name="zip_code" value="<?php echo htmlspecialchars($zip_code); ?>" required>
         </div>
         <div class="mb-3">
             <label for="media" class="form-label">Property Media (Image/Video)</label>

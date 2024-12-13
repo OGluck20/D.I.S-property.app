@@ -158,26 +158,4 @@ $stmt->execute();
     </div>
 </div>
 
-<script>
-    // Function to open the modal and preview the media
-    function openModal(mediaSrc, mediaType) {
-        var modal = document.getElementById("mediaModal");
-        var mediaContent = document.getElementById("modalMediaContent");
-        
-        if (mediaType === 'image') {
-            mediaContent.innerHTML = '<img src="' + mediaSrc + '">';
-        } else if (mediaType === 'video') {
-            mediaContent.innerHTML = '<video controls><source src="' + mediaSrc + '" type="video/mp4">Your browser does not support the video tag.</video>';
-        }
-
-        modal.style.display = "block";
-    }
-
-    // Function to close the modal
-    function closeModal() {
-        var modal = document.getElementById("mediaModal");
-        modal.style.display = "none";
-    }
-</script>
-
 <?php include 'includes/footer.php'; ?>

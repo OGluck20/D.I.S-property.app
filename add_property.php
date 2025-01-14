@@ -101,6 +101,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <!-- style -->
 <style>
+    :root {
+    --primary: #2ecc71;
+    --primary-dark: #27ae60;
+    --secondary: #34495e;
+    --accent: #3498db;
+    --background: #f9fafb;
+    --text: #2c3e50;
+    --shadow: rgba(0, 0, 0, 0.1);
+}
     .container {
         padding: 30px 20px;
     }

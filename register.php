@@ -62,6 +62,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         padding: 30px 20px;
         height: 82vh;
     }
+    :root {
+    --primary: #2ecc71;
+    --primary-dark: #27ae60;
+    --secondary: #34495e;
+    --accent: #3498db;
+    --background: #f9fafb;
+    --text: #2c3e50;
+    --shadow: rgba(0, 0, 0, 0.1);
+}
 </style>
 <div class="container">
     <h2>Register</h2>

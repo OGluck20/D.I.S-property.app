@@ -15,28 +15,28 @@ session_start();
 <body>
     <!-- Navigation Bar -->
     <style>
+        :root {
+            --header-bg: #e8f5e9; /* Very light green background */
+        }
         .container-fluid {
-            background-color: #4CAF50; /* Green color */
+            background: var(--header-bg);
             margin-top: -8px;
             padding: 15px 10px;
-        }
-
-        .navbar {
-            background-color: #4CAF50; /* Green color */
         }
 
         .navbar-brand {
             font-size: 40px;
             margin-left: 20px;
-            color: white; /* White text for contrast */
+            color:  #27ae60; /* White text for contrast */
         }
 
         .navbar-nav .nav-link {
-            color: white; /* White text for links */
+            color:  #27ae60; /* White text for links */
         }
 
         .navbar-nav .nav-link:hover {
-            color: #e0e0e0; /* Light gray on hover */
+            color:  #2ecc71; /* Light gray on hover */
+            border-bottom: 2px solid  #2ecc71; /* Green bottom border */
         }
     </style>
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
@@ -49,21 +49,69 @@ session_start();
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     <?php if(isset($_SESSION['user_id'])): ?>
+                        <?php 
+                        $current_tab = $_GET['tab'] ?? 'dashboard';
+                        
+                        // Dynamic navigation based on active tab
+                        switch($current_tab) {
+                            case 'solutions':
+                                ?>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="solutions_services.php">Solutions</a>
+                                </li>
+                                <?php
+                                break;
+                                
+                            case 'properties':
+                                ?>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="add_property.php">Add Property</a>
+                                </li>
+                                <?php
+                                break;
+                                
+                            case 'farms':
+                                ?>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="farm_inventory.php">Inventory</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="farm_schedule.php">Schedule</a>
+                                </li>
+                                <?php
+                                break;
+                                
+                            default:
+                                ?>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="dashboard.php?tab=solutions">DIS Solutions</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="dashboard.php?tab=properties">DIS Properties</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="dashboard.php?tab=farms">DIS Farms</a>
+                                </li>
+                                <?php
+                        }
+                        ?>
                         <li class="nav-item">
-                            <a class="nav-link" href="add_property.php">Add Property</a>
+                            <a class="nav-link" href="profile.php">Profile</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" href="logout.php">Logout</a>
                         </li>
                     <?php else: ?>
                         <li class="nav-item">
-                            <a class="nav-link" href="register.php">Register</a>
+                            <a class="nav-link" href="login.php">Login</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="login.php">Login</a>
+                            <a class="nav-link" href="register.php">Register</a>
                         </li>
                     <?php endif; ?>
                 </ul>
             </div>
         </div>
     </nav>
+</body>
+</html>

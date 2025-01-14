@@ -2,278 +2,239 @@
 include 'includes/db.php';
 include 'includes/header.php';
 
-// Fetch properties from the database
-$queryProperties = "SELECT * FROM properties WHERE status='available'";
-$stmtProperties = $conn->prepare($queryProperties);
-$stmtProperties->execute();
-
-// Fetch gadgets from the database
-$queryGadgets = "SELECT * FROM gadgets";
-$stmtGadgets = $conn->prepare($queryGadgets);
-$stmtGadgets->execute();
-
-// Fetch solar installations from the database
-$querySolar = "SELECT * FROM solar_installations";
-$stmtSolar = $conn->prepare($querySolar);
-$stmtSolar->execute();
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 ?>
 
 <style>
-    .container {
-        padding: 30px 20px;
-        height: 85vh; /* Fixed height */
-        overflow-y: auto; /* Enable vertical scrolling */
-        scrollbar-width: none; /* Hide scrollbar for Firefox */
-    }
+:root {
+    --primary: #2ecc71;
+    --primary-dark: #27ae60;
+    --secondary: #34495e;
+    --accent: #3498db;
+    --background: #f9fafb;
+    --text: #2c3e50;
+    --shadow: rgba(0, 0, 0, 0.1);
+    --gradient: linear-gradient(135deg, var(--primary), var(--accent));
+}
+/* Hero Section Styles */
+.hero {
+    width: 100%;
+    height: 100vh;
+    background: var(--background);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    position: relative;
+    overflow: hidden;
+}
 
-    /* Hide scrollbar for WebKit browsers */
-    .container::-webkit-scrollbar {
-        display: none;
-    }
+.hero::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('path/to/pattern.svg');
+    opacity: 0.1;
+    z-index: 1;
+}
 
+/* Update Hero Content text color */
+.hero-content {
+    text-align: center;
+    color: var(--primary-dark); /* Changed from white to primary-dark */
+    margin-bottom: 3rem;
+    z-index: 2;
+}
+
+/* Update title color */
+.hero-title {
+    font-size: 3.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    text-shadow: 2px 2px 4px var(--shadow);
+    color: var(--primary); /* Added primary color */
+}
+
+/* Update subtitle color */
+.hero-subtitle {
+    font-size: 1.5rem;
+    opacity: 0.9;
+    margin-bottom: 2rem;
+    color: var(--primary-dark); /* Added primary-dark color */
+}
+
+/* Navigation Tabs Styles */
+.nav-tabs {
+    background: var(--background);
+    padding: 1rem;
+    border-radius: 15px;
+    border: none;
+    display: flex;
+    gap: 1rem;
+    box-shadow: 0 4px 6px var(--shadow);
+}
+
+.nav-tabs .nav-item {
+    margin: 0;
+}
+
+.nav-tabs .nav-link {
+    color: var(--text);
+    padding: 1rem 2rem;
+    border: 2px solid var(--primary);
+    border-radius: 10px;
+    transition: all 0.3s ease;
+    font-weight: 500;
+    background: transparent;
+}
+
+.nav-tabs .nav-link:hover {
+    background: var(--primary);
+    color: white;
+    transform: translateY(-2px);
+}
+
+.nav-tabs .nav-link.active {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+}
+
+.nav-tabs .nav-link i {
+    margin-right: 8px;
+}
+
+/* Floating Elements */
+.floating-element {
+    position: absolute;
+    z-index: 1;
+}
+
+.floating-1 {
+    top: 10%;
+    left: 5%;
+    animation: float 20s infinite;
+}
+
+.floating-2 {
+    bottom: 15%;
+    right: 10%;
+    animation: float 16s infinite reverse;
+}
+
+.floating-3 {
+    top: 40%;
+    right: 15%;
+    animation: float 18s infinite;
+}
+
+.floating-4 {
+    bottom: 30%;
+    left: 10%;
+    animation: float 25s infinite reverse;
+}
+
+.floating-5 {
+    top: 20%;
+    right: 30%;
+    animation: float 22s infinite;
+}
+
+.floating-6 {
+    bottom: 10%;
+    left: 40%;
+    animation: float 16s infinite reverse;
+}
+
+.floating-element i {
+    color: var(--primary);
+    opacity: 0.3;  /* Increased from 0.15 for better visibility */
+}
+
+@keyframes float {
+    0% { transform: translate(0, 0) rotate(0deg); }
+    50% { transform: translate(20px, -20px) rotate(180deg); }
+    100% { transform: translate(0, 0) rotate(360deg); }
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .hero-title {
+        font-size: 2.5rem;
+    }
+    
+    .hero-subtitle {
+        font-size: 1.2rem;
+    }
+    
     .nav-tabs {
-        margin-bottom: 20px;
-        flex-wrap: wrap; /* Allow tabs to wrap on smaller screens */
-        justify-content: center; /* Center tabs */
+        flex-direction: column;
+        width: 90%;
+        gap: 0.5rem;
     }
-
+    
     .nav-tabs .nav-link {
-        color: #4CAF50; /* Green color */
-        padding: 10px 15px; /* Increased padding for better touch targets */
-        margin: 5px; /* Margin between tabs */
-        border-radius: 5px; /* Rounded corners */
-        transition: background-color 0.3s; /* Smooth background transition */
-    }
-
-    .nav-tabs .nav-link.active {
-        background-color: #4CAF50; /* Active tab color */
-        color: white; /* Active tab text color */
-    }
-
-    .nav-tabs .nav-link:hover {
-        background-color: rgba(76, 175, 80, 0.7); /* Lighten on hover */
-        color: white; /* White text on hover */
-    }
-
-    .search-bar {
-        margin-bottom: 20px;
-    }
-
-    .property-card {
-        border: 1px solid #ddd;
-        border-radius: 5px;
-        overflow: hidden;
-        transition: transform 0.2s;
-        position: relative; /* For positioning price tag */
-    }
-
-    .property-card:hover {
-        transform: scale(1.02); /* Slight scale effect on hover */
-    }
-
-    .media-preview {
         width: 100%;
-        height: 200px;
-        object-fit: cover;
-        transition: transform 0.2s; /* Smooth transition for image */
+        text-align: center;
+        padding: 0.75rem;
     }
-
-    .property-card:hover .media-preview {
-        transform: scale(1.05); /* Pinch effect on image hover */
-    }
-
-    .card-body {
-        padding: 15px;
-    }
-
-    .card-title {
-        font-size: 1.25rem;
-        font-weight: bold;
-    }
-
-    .card-text {
-        margin: 10px 0;
-    }
-
-    .price-tag {
-        position: absolute;
-        top: 10px;
-        right: 10px;
-        background-color: #4CAF50; /* Green background */
-        color: white; /* White text */
-        padding: 5px 10px;
-        border-radius: 5px;
-        font-weight: bold;
-    }
-
-    .timestamp, .location {
-        font-size: 0.9rem; /* Smaller font size */
-        color: gray; /* Color for timestamp and location */
-    }
-
-    .btn {
-        margin-right: 5px;
-        transition: background-color 0.3s, transform 0.2s; /* Smooth transition for buttons */
-    }
-
-    .btn-primary {
-        background-color: #007bff; /* Bootstrap primary color */
-        border: none; /* Remove border */
-    }
-
-    .btn-primary:hover {
-        background-color: #0056b3; /* Darker blue on hover */
-        transform: scale(1.05); /* Slightly enlarge on hover */
-    }
-
-    .btn-success {
-        background-color: #28a745; /* Bootstrap success color */
-        border: none; /* Remove border */
-    }
-
-    .btn-success:hover {
-        background-color: #218838; /* Darker green on hover */
-        transform: scale(1.05); /* Slightly enlarge on hover */
-    }
+}
 </style>
 
-<div class="container">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+<!-- Hero Section with Navigation -->
+<section class="hero">
+    <!-- Floating Elements -->
+    <div class="floating-element floating-1">
+        <i class="fas fa-home fa-2x"></i>
+    </div>
+    <div class="floating-element floating-2">
+        <i class="fas fa-leaf fa-2x"></i>
+    </div>
+    <div class="floating-element floating-3">
+        <i class="fas fa-cogs fa-2x"></i>
+    </div>
+    <div class="floating-element floating-4">
+        <i class="fas fa-desktop fa-2x"></i>
+    </div>
+    <div class="floating-element floating-5">
+        <i class="fas fa-network-wired fa-2x"></i>
+    </div>
+    <div class="floating-element floating-6">
+        <i class="fas fa-server fa-2x"></i>
+    </div>
+
+    <!-- Hero Content -->
+    <div class="hero-content">
+        <h1 class="hero-title">Welcome to DIS Group</h1>
+        <p class="hero-subtitle">Innovative Solutions for Properties, Technology, and Agriculture</p>
+    </div>
 
     <!-- Navigation Tabs -->
     <ul class="nav nav-tabs">
         <li class="nav-item">
-            <a class="nav-link active" href="#solutions" data-bs-toggle="tab">DIS Solutions</a>
+            <a class="nav-link" href="<?php echo isset($_SESSION['user_id']) ? 'dashboard.php?tab=solutions' : 'login.php'; ?>">
+                <i class="fas fa-tools"></i> DIS Solutions
+            </a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" href="#properties" data-bs-toggle="tab">DIS Properties</a>
+            <a class="nav-link" href="<?php echo isset($_SESSION['user_id']) ? 'dashboard.php?tab=properties' : 'login.php'; ?>">
+                <i class="fas fa-home"></i> DIS Properties
+            </a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" href="#farms" data-bs-toggle="tab">DIS Farms</a>
+            <a class="nav-link" href="<?php echo isset($_SESSION['user_id']) ? 'dashboard.php?tab=farms' : 'login.php'; ?>">
+                <i class="fas fa-leaf"></i> DIS Farms
+            </a>
         </li>
     </ul>
-
-    <!-- Search Functionality -->
-    <div class="search-bar">
-        <form action="index.php" method="GET">
-            <div class="input-group">
-                <input type="text" class="form-control" name="search" placeholder="Search properties...">
-                <button class="btn btn-outline-secondary" type="submit">Search</button>
-            </div>
-        </form>
-    </div>
-
-    <div class="tab-content">
-        <div class="tab-pane fade show active" id="solutions">
-            <h2>Available Gadgets</h2>
-            <div class="row">
-                <?php if ($stmtGadgets->rowCount() > 0): ?>
-                    <?php while ($gadget = $stmtGadgets->fetch(PDO::FETCH_ASSOC)): ?>
-                        <div class="col-lg-4 col-md-6 mb-4">
-                            <div class="card property-card">
-                                <img src="uploads/<?php echo htmlspecialchars($gadget['media']); ?>" class="media-preview" alt="<?php echo htmlspecialchars($gadget['name']); ?>">
-                                <div class="card-body">
-                                    <h5 class="card-title"><?php echo htmlspecialchars($gadget['name']); ?></h5>
-                                    <p class="card-text"><?php echo htmlspecialchars($gadget['description']); ?></p>
-                                    <p class="card-text"><strong>Price:</strong> ₦<?php echo number_format($gadget['price'], 2); ?></p>
-                                    <a href="buy.php?id=<?php echo $gadget['id']; ?>" class="btn btn-success">Buy</a>
-                                </div>
-                            </div>
-                        </div>
-                    <?php endwhile; ?>
-                <?php else: ?>
-                    <p>No gadgets available at the moment.</p>
-                <?php endif; ?>
-            </div>
-
-            <h2>Available Solar Installations</h2>
-            <div class="row">
-                <?php if ($stmtSolar->rowCount() > 0): ?>
-                    <?php while ($solar = $stmtSolar->fetch(PDO::FETCH_ASSOC)): ?>
-                        <div class="col-lg-4 col-md-6 mb-4">
-                            <div class="card property-card">
-                                <img src="uploads/<?php echo htmlspecialchars($solar['media']); ?>" class="media-preview" alt="<?php echo htmlspecialchars($solar['name']); ?>">
-                                <div class="card-body">
-                                    <h5 class="card-title"><?php echo htmlspecialchars($solar['name']); ?></h5>
-                                    <p class="card-text"><?php echo htmlspecialchars($solar['description']); ?></p>
-                                    <p class="card-text"><strong>Price:</strong> ₦<?php echo number_format($solar['price'], 2); ?></p>
-                                    <a href="book_consultation.php?id=<?php echo $solar['id']; ?>" class="btn btn-primary">Book Consultation</a>
-                                </div>
-                            </div>
-                        </div>
-                    <?php endwhile; ?>
-                <?php else: ?>
-                    <p>No solar installations available at the moment.</p>
-                <?php endif; ?>
-            </div>
-        </div>
-
-        <div class="tab-pane fade" id="properties">
-            <h2>Available Properties</h2>
-            <div class="row">
-                <?php if ($stmtProperties->rowCount() > 0): ?>
-                    <?php while ($property = $stmtProperties->fetch(PDO::FETCH_ASSOC)): ?>
-                        <div class="col-lg-4 col-md-6 mb-4">
-                            <div class="card property-card">
-                                <?php if ($property['media']): ?>
-                                    <img src="uploads/<?php echo htmlspecialchars($property['media']); ?>" 
-                                         class="media-preview" 
-                                         alt="<?php echo htmlspecialchars($property['title']); ?>">
-                                <?php else: ?>
-                                    <img src="https://via.placeholder.com/350x200" class="media-preview" alt="No Media">
-                                <?php endif; ?>
-                                <div class="price-tag">₦<?php echo number_format($property['price'], 2); ?></div>
-                                <div class="card-body">
-                                    <h5 class="card-title"><?php echo htmlspecialchars($property['title']); ?></h5>
-                                    <p class="card-text"><?php echo htmlspecialchars($property['description']); ?></p>
-                                    <p class="card-text location">
-                                        <i class="fas fa-map-marker-alt"></i> <!-- Font Awesome icon for location -->
-                                        <?php echo htmlspecialchars($property['city'] . ', ' . $property['state']); ?>
-                                    </p>
-                                    <p class="card-text timestamp">
-                                        <i class="fas fa-clock"></i> <!-- Font Awesome icon for timestamp -->
-                                        Added on: <?php echo date('Y-m-d H:i:s', strtotime($property['created_at'])); ?>
-                                    </p>
-                                    <a href="property.php?id=<?php echo $property['id']; ?>" class="btn btn-primary">View Details</a>
-                                    <a href="purchase.php?id=<?php echo $property['id']; ?>" class="btn btn-success">Purchase</a>
-                                </div>
-                            </div>
-                        </div>
-                    <?php endwhile; ?>
-                <?php else: ?>
-                    <p>No properties available at the moment.</p>
-                <?php endif; ?>
-            </div>
-        </div>
-
-        <div class="tab-pane fade" id="farms">
-            <h2>Available Livestock</h2>
-            <div class="row">
-                <?php
-                // Fetch farms from the database
-                $queryFarms = "SELECT * FROM farms"; // Adjust the table name as necessary
-                $stmtFarms = $conn->prepare($queryFarms);
-                $stmtFarms->execute();
-
-                if ($stmtFarms->rowCount() > 0):
-                    while ($farm = $stmtFarms->fetch(PDO::FETCH_ASSOC)): ?>
-                        <div class="col-lg-4 col-md-6 mb-4">
-                            <div class="card property-card">
-                                <img src="uploads/<?php echo htmlspecialchars($farm['media']); ?>" class="media-preview" alt="<?php echo htmlspecialchars($farm['name']); ?>">
-                                <div class="card-body">
-                                    <h5 class="card-title"><?php echo htmlspecialchars($farm['name']); ?></h5>
-                                    <p class="card-text"><?php echo htmlspecialchars($farm['description']); ?></p>
-                                    <p class="card-text"><strong>Price:</strong> ₦<?php echo number_format($farm['price'], 2); ?></p>
-                                    <a href="book_farm_visit.php?id=<?php echo $farm['id']; ?>" class="btn btn-primary">Book Visit</a>
-                                </div>
-                            </div>
-                        </div>
-                    <?php endwhile; 
-                else: ?>
-                    <p>No livestock available at the moment.</p>
-                <?php endif; ?>
-            </div>
-        </div>
-    </div>
-</div>
+</section>
 
 <?php include 'includes/footer.php'; ?>

@@ -21,7 +21,7 @@ session_start();
         .container-fluid {
             background: var(--header-bg);
             margin-top: -8px;
-            padding: 15px 10px;
+            padding: 10px 5px;
         }
 
         .navbar-brand {
@@ -72,26 +72,11 @@ session_start();
                                 
                             case 'farms':
                                 ?>
-                                <li class="nav-item">
-                                    <a class="nav-link" href="farm_inventory.php">Inventory</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link" href="farm_schedule.php">Schedule</a>
-                                </li>
                                 <?php
                                 break;
                                 
                             default:
                                 ?>
-                                <li class="nav-item">
-                                    <a class="nav-link" href="dashboard.php?tab=solutions">DIS Solutions</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link" href="dashboard.php?tab=properties">DIS Properties</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link" href="dashboard.php?tab=farms">DIS Farms</a>
-                                </li>
                                 <?php
                         }
                         ?>

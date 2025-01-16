@@ -95,7 +95,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     --background: #f9fafb;
     --text: #2c3e50;
     --shadow: rgba(0, 0, 0, 0.1);
-}
+    }
     .container {
         padding: 30px 20px;
         max-width: 1200px;
@@ -324,7 +324,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             
             <div class="media-container" onclick="openModal('uploads/<?php echo htmlspecialchars($property['media']); ?>', '<?php echo $media_ext; ?>')">
                 <?php if ($is_image): ?>
-                    <img src="uploads/<?php echo htmlspecialchars($property['media']); ?>" alt="<?php echo htmlspecialchars($property['title']); ?>">
+                    <img src="uploads/properties/<?php echo htmlspecialchars($property['media']); ?>" alt="<?php echo htmlspecialchars($property['title']); ?>">
                 <?php elseif ($is_video): ?>
                     <video controls>
                         <source src="uploads/<?php echo htmlspecialchars($property['media']); ?>" type="video/<?php echo $media_ext; ?>">
@@ -392,7 +392,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
     </div>
 </div>
-
 <!-- Modal for previewing media -->
 <div id="mediaModal" class="modal">
     <span class="close" onclick="closeModal()">&times;</span>

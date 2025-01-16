@@ -70,7 +70,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     --background: #f9fafb;
     --text: #2c3e50;
     --shadow: rgba(0, 0, 0, 0.1);
-}
+ }
 </style>
 <div class="container">
     <h2>Register</h2>

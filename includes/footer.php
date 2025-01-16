@@ -120,11 +120,15 @@
         <div class="footer-section">
             <h3>Quick Links</h3>
             <ul class="quick-links">
-                <li><a href="#">Home</a></li>
-                <li><a href="#">About Us</a></li>
-                <li><a href="#">Services</a></li>
-                <li><a href="#">Properties</a></li>
-                <li><a href="#">Contact</a></li>
+                <li class="nav-item">
+                    <a class="nav-link" href="dashboard.php?tab=solutions">DIS Solutions</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="dashboard.php?tab=properties">DIS Properties</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="dashboard.php?tab=farms">DIS Farms</a>
+                </li>
             </ul>
         </div>
 

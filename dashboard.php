@@ -17,7 +17,7 @@ $queryProperties = "SELECT * FROM properties WHERE status='available'";
 $stmtProperties = $conn->prepare($queryProperties);
 $stmtProperties->execute();
 
-$queryGadgets = "SELECT * FROM gadgets";
+$queryGadgets = "SELECT * FROM devices";
 $stmtGadgets = $conn->prepare($queryGadgets);
 $stmtGadgets->execute();
 
@@ -43,7 +43,7 @@ $selected_tab = isset($_GET['tab']) ? $_GET['tab'] : 'gadgets';
     --background: #f9fafb;
     --text: #2c3e50;
     --shadow: rgba(0, 0, 0, 0.1);
-}
+    }
     .container {
         padding: 30px 20px;
         height: 85vh; /* Fixed height */
@@ -292,7 +292,17 @@ $selected_tab = isset($_GET['tab']) ? $_GET['tab'] : 'gadgets';
     .property-actions {
         display: flex;
         gap: 10px;
-        margin-top: auto;
+        margin-top: 15px;
+    }
+
+    .property-description {
+        color: #666;
+        margin: 10px 0;
+        line-height: 1.4;
+    }
+
+    .btn i {
+        margin-right: 5px;
     }
 
     .property-actions .btn {
@@ -342,55 +352,489 @@ $selected_tab = isset($_GET['tab']) ? $_GET['tab'] : 'gadgets';
         font-size: 1.1rem;
         margin: 0;
     }
+
+    .gadgets-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 1.5rem;
+        padding: 1.5rem 0;
+    }
+
+    .no-results {
+    text-align: center;
+    padding: 1rem;
+    margin-top: -40vh;
+    margin-bottom: 40vh;
+    font-size: 1.2rem;
+    color: #6c757d;
+    width: 100%;
+    }
+
+    .gadget-card {
+        background: white;
+        border-radius: 15px;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        border: 1px solid var(--shadow);
+    }
+
+
+    .gadget-card.hidden {
+        display: none;
+    }
+
+    .gadget-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    }
+
+    .gadget-image {
+        height: 200px;
+        background: #f8f9fa;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .gadget-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .gadget-category {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        background: rgba(255,255,255,0.9);
+        padding: 0.5rem;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--primary);
+    }
+
+    .gadget-content {
+        padding: 1.5rem;
+    }
+
+    .gadget-name {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: var(--text);
+    }
+
+    .gadget-specs {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1rem;
+        font-size: 0.9rem;
+        color: #666;
+    }
+
+    .gadget-price {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--primary);
+        margin-bottom: 1rem;
+    }
+
+    .gadget-actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .btn-action {
+        flex: 1;
+        padding: 0.75rem;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+
+    .btn-details {
+        background: var(--primary);
+        color: white;
+    }
+
+    .btn-details:hover {
+        background: var(--primary-dark);
+    }
+
+    .btn-cart {
+        background: var(--background);
+        color: var(--text);
+        border: 2px solid var(--primary);
+    }
+
+    .btn-cart:hover {
+        background: var(--primary);
+        color: white;
+    }
+
+    .brand-filter {
+        overflow-x: auto;
+        white-space: nowrap;
+        padding: 1rem 0;
+        margin-bottom: 2rem;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .brand-list {
+        display: inline-flex;
+        gap: 1rem;
+        padding: 0.5rem;
+    }
+
+    .brand-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.5rem;
+        background: white;
+        border: 2px solid var(--shadow);
+        border-radius: 50px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .brand-item:hover, 
+    .brand-item.active {
+        background: var(--primary);
+        color: white;
+        border-color: var(--primary);
+        transform: translateY(-2px);
+    }
+
+    .brand-item i {
+        font-size: 1.2rem;
+    }
+
+    /* Hide scrollbar */
+    .brand-filter::-webkit-scrollbar {
+        display: none;
+    }
+
+    body {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .main-container {
+        flex: 1;
+        padding: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .tab-content {
+        height: 100%;
+    }
+
+    .gadgets-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 1.5rem;
+        padding: 1.5rem 0;
+        min-height: calc(100vh - 300px); /* Adjust based on header/footer height */
+    }
+
+    /* Ensure footer stays at bottom */
+    footer {
+        margin-top: auto;
+    }
+
+    .solutions-container {
+        margin-top: 3rem;
+    }
+
+    .solution-card {
+        background: white;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 4px 6px var(--shadow);
+        transition: transform 0.3s ease;
+    }
+
+    .solution-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .solution-image {
+        height: 200px;
+        overflow: hidden;
+    }
+
+    .solution-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .solution-content {
+        padding: 1.5rem;
+    }
+
+    .solution-type {
+        background: var(--primary);
+        color: white;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        display: inline-block;
+        margin-bottom: 1rem;
+    }
+
+    .solution-title {
+        font-size: 1.25rem;
+        margin-bottom: 1rem;
+        color: var(--text);
+    }
+
+    .solution-price {
+        font-size: 1.5rem;
+        color: var(--primary);
+        font-weight: 600;
+        margin-bottom: 1rem;
+    }
+
+    .btn-whatsapp {
+        background: #25D366;
+        color: white;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        transition: all 0.3s ease;
+        text-decoration: none;
+    }
+
+    .btn-whatsapp:hover {
+        background: #128C7E;
+        color: white;
+    }
+
+    .btn-whatsapp-buy {
+        background: #25D366;
+        color: white;
+        border: none;
+        padding: 0.75rem;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        width: 100%;
+        text-decoration: none;
+        transition: all 0.3s ease;
+    }
+
+    .btn-whatsapp-buy:hover {
+        background: #128C7E;
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    .book-visit-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #25D366;
+    color: white;
+    padding: 8px 20px;
+    border-radius: 25px;
+    text-decoration: none;
+    transition: background 0.3s ease;
+    }
+
+    .book-visit-btn:hover {
+        background: #128C7E;
+        color: white;
+    }
 </style>
 
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
-<div class="container">
-
-    <!-- Tab Content -->
+<div class="main-container">
     <div class="tab-content">
         <?php if ($selected_tab === 'solutions'): ?>
             <div class="tab-pane fade show active" id="gadgets">
                 <h2>Available Gadgets</h2>
-                <div class="row">
-                    <?php if ($stmtGadgets->rowCount() > 0): ?>
-                        <?php while ($gadget = $stmtGadgets->fetch(PDO::FETCH_ASSOC)): ?>
-                            <div class="col-lg-4 col-md-6 mb-4">
-                                <div class="card property-card">
-                                    <img src="uploads/<?php echo htmlspecialchars($gadget['media']); ?>" class="media-preview" alt="<?php echo htmlspecialchars($gadget['name']); ?>">
-                                    <div class="card-body">
-                                        <h5 class="card-title"><?php echo htmlspecialchars($gadget['name']); ?></h5>
-                                        <p class="card-text"><?php echo htmlspecialchars($gadget['description']); ?></p>
-                                        <p class="card-text"><strong>Price:</strong> ₦<?php echo number_format($gadget['price'], 2); ?></p>
-                                        <a href="buy.php?id=<?php echo $gadget['id']; ?>" class="btn btn-success">Buy</a>
-                                    </div>
-                                </div>
-                            </div>
-                        <?php endwhile; ?>
-                    <?php else: ?>
-                        <p>No gadgets available at the moment.</p>
-                    <?php endif; ?>
+                
+                <!-- Brand Filter -->
+                <div class="brand-filter">
+                    <div class="brand-list">
+                    <div class="brand-item active">
+                            <span>All</span>
+                        </div>
+                        <div class="brand-item" data-brand="Apple">
+                            <i class="fab fa-apple"></i>
+                            <span>Apple</span>
+                        </div>
+                        <div class="brand-item" data-brand="Samsung">
+                            <i class="fab fa-samsung"></i>
+                            <span>Samsung</span>
+                        </div>
+                        <div class="brand-item" data-brand="Google">
+                            <i class="fab fa-android"></i>
+                            <span>Google</span>
+                        </div>
+                        <div class="brand-item" data-brand="OnePlus">
+                            <i class="fas fa-mobile-alt"></i>
+                            <span>OnePlus</span>
+                        </div>
+                        <div class="brand-item" data-brand="Xiaomi">
+                            <i class="fas fa-mobile"></i>
+                            <span>Xiaomi</span>
+                        </div>
+                        <div class="brand-item" data-brand="Huawei">
+                            <i class="fas fa-mobile-alt"></i>
+                            <span>Huawei</span>
+                        </div>
+                        <div class="brand-item" data-brand="Tecno">
+                            <i class="fas fa-mobile-alt"></i>
+                            <span>Tecno</span>
+                        </div>
+                        <div class="brand-item" data-brand="HP">
+                            <i class="fas fa-laptop"></i>
+                            <span>HP</span>
+                        </div>
+                        <div class="brand-item" data-brand="Dell">
+                            <i class="fas fa-laptop"></i>
+                            <span>Dell</span>
+                        </div>
+                        <div class="brand-item" data-brand="Asus">
+                            <i class="fas fa-laptop"></i>
+                            <span>Asus</span>
+                        </div>
+                    </div>
                 </div>
 
-                <h2>Available Solar Installations</h2>
-                <div class="row">
-                    <?php if ($stmtSolar->rowCount() > 0): ?>
-                        <?php while ($solar = $stmtSolar->fetch(PDO::FETCH_ASSOC)): ?>
-                            <div class="col-lg-4 col-md-6 mb-4">
-                                <div class="card property-card">
-                                    <img src="uploads/<?php echo htmlspecialchars($solar['media']); ?>" class="media-preview" alt="<?php echo htmlspecialchars($solar['name']); ?>">
-                                    <div class="card-body">
-                                        <h5 class="card-title"><?php echo htmlspecialchars($solar['name']); ?></h5>
-                                        <p class="card-text"><?php echo htmlspecialchars($solar['description']); ?></p>
-                                        <p class="card-text"><strong>Price:</strong> ₦<?php echo number_format($solar['price'], 2); ?></p>
-                                        <a href="book_consultation.php?id=<?php echo $solar['id']; ?>" class="btn btn-primary">Book Consultation</a>
+                <!-- Existing gadgets grid -->
+                <div class="gadgets-grid">
+                    <?php if ($stmtGadgets->rowCount() > 0): ?>
+                        <?php while ($gadget = $stmtGadgets->fetch(PDO::FETCH_ASSOC)): ?>
+                            <div class="gadget-card">
+                                <div class="gadget-image">
+                                    <img src="uploads/devices/<?php echo htmlspecialchars($gadget['media']); ?>" 
+                                         alt="<?php echo htmlspecialchars($gadget['name']); ?>">
+                                </div>
+                                <div class="gadget-content">
+                                    <h3 class="gadget-name"><?php echo htmlspecialchars($gadget['name']); ?></h3>
+                                    <div class="gadget-specs">
+                                    <span>
+                                        <?php 
+                                        $brandIcon = 'fa-mobile-alt';
+                                        switch(strtolower($gadget['brand'])) {
+                                            case 'apple':
+                                                $brandIcon = 'fab fa-apple';
+                                                break;
+                                            case 'samsung':
+                                                $brandIcon = 'fa fa-mobile-alt';
+                                                break;
+                                            case 'google':
+                                                $brandIcon = 'fab fa-google';
+                                                break;
+                                            case 'oneplus':
+                                                $brandIcon = 'fa fa-mobile-alt';
+                                                break;
+                                            case 'xiaomi':
+                                                $brandIcon = 'fa fa-mobile-alt';
+                                                break;
+                                            case 'huawei':
+                                                $brandIcon = 'fa fa-mobile-alt';
+                                                break;
+                                            case 'HP':
+                                                $brandIcon = 'fas fa-laptop';
+                                                break;
+                                            case 'dell':
+                                                $brandIcon = 'fas fa-laptop';
+                                                break;
+                                            case 'asus':
+                                                $brandIcon = 'fas fa-laptop';
+                                                break;
+                                        }
+                                        ?>
+                                        <i class="<?php echo $brandIcon; ?>"></i>
+                                        <?php echo htmlspecialchars($gadget['brand'] ?? 'N/A'); ?>
+                                    </span>                                        <span><i class="fas fa-memory"></i> <?php echo htmlspecialchars($gadget['ram'] ?? 'N/A'); ?> RAM</span>
+                                        <span><i class="fas fa-hdd"></i> <?php echo htmlspecialchars($gadget['storage'] ?? 'N/A'); ?></span>
+                                    </div>
+                                    <div class="gadget-price">
+                                        ₦<?php echo number_format($gadget['price'], 2); ?>
+                                    </div>
+                                    <div class="gadget-actions">
+                                        <!-- <button class="btn-action btn-details">View Details</button> -->
+                                        <a href="https://wa.me/+2347060592446?text=I'm%20interested%20in%20buying%20<?php echo urlencode($gadget['name']); ?>%20for%20₦<?php echo number_format($gadget['price'], 2); ?>" 
+                                           class="btn-whatsapp-buy" 
+                                           target="_blank">
+                                            <i class="fab fa-whatsapp"></i> Buy Now
+                                        </a>
                                     </div>
                                 </div>
                             </div>
                         <?php endwhile; ?>
                     <?php else: ?>
-                        <p>No solar installations available at the moment.</p>
+                        <div class="no-gadgets">
+                            <p>No gadgets available at the moment.</p>
+                        </div>
                     <?php endif; ?>
+                </div>
+                <div class="no-results" style="display: none;">
+                    <p>No gadgets available for <span class="selected-brand"></span></p>
+                </div>
+
+                <h2 style="margin-top: 2rem; text-align: center;">Available Solutions</h2>
+
+                <!-- Solutions Section -->
+                <div class="solutions-container">
+                    <div class="row">
+                        <!-- Solar Solutions -->
+                        <div class="col-lg-6 mb-4">
+                            <div class="solution-card">
+                                <div class="solution-image">
+                                    <img src="assets\images\ajao_480x480.jpg" alt="Solar Installation">
+                                </div>
+                                <div class="solution-content">
+                                    <span class="solution-type">Solar Installation</span>
+                                    <h3 class="solution-title">Professional Solar System Installation</h3>
+                                    <p>Complete solar power solutions for homes and businesses. Includes panels, inverters, and batteries.</p>
+                                    <div class="solution-price">Starting from ₦500,000</div>
+                                    <a href="https://wa.me/+2347060592446?text=I'm%20interested%20in%20solar%20installation" 
+                                       class="btn-whatsapp" target="_blank">
+                                        <i class="fab fa-whatsapp"></i> Consult on WhatsApp
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- CCTV Solutions -->
+                        <div class="col-lg-6 mb-4">
+                            <div class="solution-card">
+                                <div class="solution-image">
+                                    <img src="assets\images\CCTV-Camera-Installation-4cd77782f3a8decda2dc4b64a6390333.jpeg" alt="CCTV Installation">
+                                </div>
+                                <div class="solution-content">
+                                    <span class="solution-type">CCTV Installation</span>
+                                    <h3 class="solution-title">Security Camera Systems</h3>
+                                    <p>Advanced CCTV surveillance systems for maximum security. Includes cameras, DVR, and mobile monitoring.</p>
+                                    <div class="solution-price">Starting from ₦250,000</div>
+                                    <a href="https://wa.me/+2347060592446?text=I'm%20interested%20in%20CCTV%20installation" 
+                                       class="btn-whatsapp" target="_blank">
+                                        <i class="fab fa-whatsapp"></i> Consult on WhatsApp
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         <?php elseif ($selected_tab === 'properties'): ?>
@@ -418,7 +862,7 @@ $selected_tab = isset($_GET['tab']) ? $_GET['tab'] : 'gadgets';
                                 <div class="property-card">
                                     <div class="property-image">
                                         <?php if ($property['media']): ?>
-                                            <img src="uploads/<?php echo htmlspecialchars($property['media']); ?>" 
+                                            <img src="uploads/properties/<?php echo htmlspecialchars($property['media']); ?>" 
                                                  class="media-preview" 
                                                  alt="<?php echo htmlspecialchars($property['title']); ?>">
                                         <?php else: ?>
@@ -441,9 +885,19 @@ $selected_tab = isset($_GET['tab']) ? $_GET['tab'] : 'gadgets';
                                                 <?php echo date('M d, Y', strtotime($property['created_at'])); ?>
                                             </span>
                                         </div>
-                                        <p class="property-description"><?php echo htmlspecialchars($property['description']); ?></p>
+                                        <p class="property-description">
+                                            <?php 
+                                            $description = htmlspecialchars($property['description']);
+                                            echo (strlen($description) > 60) ? substr($description, 0, 60) . '...' : $description;
+                                            ?>
+                                        </p>
                                         <div class="property-actions">
-                                            <a href="purchase.php?id=<?php echo $property['id']; ?>" class="btn btn-success">Purchase</a>
+                                            <a href="purchase.php?id=<?php echo $property['id']; ?>" class="btn btn-primary">
+                                                <i class="fas fa-eye"></i> View Details
+                                            </a>
+                                            <a href="purchase.php?id=<?php echo $property['id']; ?>" class="btn btn-success">
+                                                <i class="fas fa-shopping-cart"></i> Purchase
+                                            </a>
                                         </div>
                                     </div>
                                 </div>
@@ -472,7 +926,13 @@ $selected_tab = isset($_GET['tab']) ? $_GET['tab'] : 'gadgets';
                                         <h5 class="card-title"><?php echo htmlspecialchars($farm['name']); ?></h5>
                                         <p class="card-text"><?php echo htmlspecialchars($farm['description']); ?></p>
                                         <p class="card-text"><strong>Price:</strong> ₦<?php echo number_format($farm['price'], 2); ?></p>
-                                        <a href="book_farm_visit.php?id=<?php echo $farm['id']; ?>" class="btn btn-primary">Book Visit</a>
+                                        <?php
+                                        $whatsapp_message = "Hi, I'm interested in booking a visit for the " . $farm['name'] . " listed at ₦" . number_format($farm['price'], 2);
+                                        $whatsapp_url = "https://wa.me/+2348078123476?text=" . urlencode($whatsapp_message);
+                                        ?>
+                                        <a href="<?php echo $whatsapp_url; ?>" class="book-visit-btn" target="_blank">
+                                            <i class="fab fa-whatsapp"></i> Book Visit
+                                        </a>
                                     </div>
                                 </div>
                             </div>
@@ -487,28 +947,48 @@ $selected_tab = isset($_GET['tab']) ? $_GET['tab'] : 'gadgets';
 </div>
 
 <script>
+
 document.addEventListener('DOMContentLoaded', function() {
-    const categoryTags = document.querySelectorAll('.category-tag');
-    const gadgetItems = document.querySelectorAll('.gadget-item');
+    const filterButtons = document.querySelectorAll('.brand-item');
+    const gadgetCards = document.querySelectorAll('.gadget-card');
+    const noResults = document.querySelector('.no-results');
+    const selectedBrandSpan = document.querySelector('.selected-brand');
 
-    categoryTags.forEach(tag => {
-        tag.addEventListener('click', () => {
-            // Remove active class from all tags
-            categoryTags.forEach(t => t.classList.remove('active'));
-            // Add active class to clicked tag
-            tag.classList.add('active');
-
-            const selectedCategory = tag.dataset.category;
-
-            gadgetItems.forEach(item => {
-                if (selectedCategory === 'all' || item.dataset.category === selectedCategory) {
-                    item.classList.remove('hidden');
+    filterButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            filterButtons.forEach(btn => btn.classList.remove('active'));
+            button.classList.add('active');
+            
+            const selectedBrand = button.getAttribute('data-brand') || 'all';
+            let visibleCards = 0;
+            
+            gadgetCards.forEach(card => {
+                if (selectedBrand === 'all') {
+                    card.style.display = 'block';
+                    visibleCards++;
                 } else {
-                    item.classList.add('hidden');
+                    const cardBrand = card.querySelector('.gadget-specs span:first-child').textContent.trim();
+                    if (cardBrand.includes(selectedBrand)) {
+                        card.style.display = 'block';
+                        visibleCards++;
+                    } else {
+                        card.style.display = 'none';
+                    }
                 }
             });
+
+            // Show/hide no results message
+            if (visibleCards === 0) {
+                selectedBrandSpan.textContent = selectedBrand === 'all' ? 'any brand' : selectedBrand;
+                noResults.style.display = 'block';
+            } else {
+                noResults.style.display = 'none';
+            }
         });
     });
+
+    // Initial filter
+    document.querySelector('.brand-item.active').click();
 });
 </script>
 

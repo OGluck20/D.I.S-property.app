@@ -45,7 +45,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $new_filename = uniqid('property_', true) . '.' . $file_ext;
 
             // Specify the directory to save the file
-            $upload_dir = 'uploads/';
+            $upload_dir = 'uploads/properties/';
 
             // Move the file to the destination directory
             if (!move_uploaded_file($file_tmp, $upload_dir . $new_filename)) {

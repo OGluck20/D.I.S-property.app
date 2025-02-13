@@ -3,20 +3,29 @@ session_start();
 require_once 'includes/db.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $username = $_POST['username'];
+    $username = trim($_POST['username']);
     $password = $_POST['password'];
 
-    // Check for admin role specifically
-    $sql = "SELECT * FROM users WHERE username = :username AND role = 'admin'";
-    $stmt = $conn->prepare($sql);
-    $stmt->execute(['username' => $username]);
+    // Case-insensitive username check
+    $stmt = $conn->prepare("SELECT * FROM users WHERE LOWER(username) = LOWER(?) AND role = 'admin'");
+    $stmt->execute([$username]);
     $admin = $stmt->fetch();
 
-    if ($admin && password_verify($password, $admin['password'])) {
+    // Add validation before accessing array elements
+    if ($admin !== false) {
+        error_log("Stored hash: " . $admin['password']);
+        $passwordMatch = password_verify($password, $admin['password']);
+        error_log("Verification: " . ($passwordMatch ? 'Match' : 'No Match'));
+    } else {
+        error_log("No admin found with username: " . $username);
+        $admin = null; // Explicitly set to null
+    }
+
+    if ($admin && $passwordMatch) {
         // Set admin session variables
         $_SESSION['user_id'] = $admin['id'];
         $_SESSION['username'] = $admin['username'];
-        $_SESSION['role'] = $admin['role'];
+        $_SESSION['role'] = 'admin';
         $_SESSION['admin_logged_in'] = true;
 
         // Use absolute path for redirect
@@ -25,6 +34,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
         $error = "Invalid admin credentials";
     }
+
+    // Add debug output
+    error_log("Login attempt - Username: " . $_POST['username']);
 }
 ?>
 

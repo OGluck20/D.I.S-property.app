@@ -57,13 +57,16 @@ session_start();
                             case 'solutions':
                                 ?>
                                 <li class="nav-item">
-                                    <a class="nav-link" href="solutions_services.php">Solutions</a>
+                                    <a class="nav-link" href="client_dashboard.php">Dashboard</a>
                                 </li>
                                 <?php
                                 break;
                                 
                             case 'properties':
                                 ?>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="client_dashboard.php">Dashboard</a>
+                                </li>
                                 <li class="nav-item">
                                     <a class="nav-link" href="add_property.php">Add Property</a>
                                 </li>
@@ -72,6 +75,9 @@ session_start();
                                 
                             case 'farms':
                                 ?>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="client_dashboard.php">Dashboard</a>
+                                </li>
                                 <?php
                                 break;
                                 
@@ -81,7 +87,9 @@ session_start();
                         }
                         ?>
                         <li class="nav-item">
-                            <a class="nav-link" href="profile.php">Profile</a>
+                            <a class="nav-link" href="index.php">
+                                <i class="fas fa-home"></i> Home
+                            </a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" href="logout.php">Logout</a>

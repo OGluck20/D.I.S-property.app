@@ -21,9 +21,9 @@ $queryGadgets = "SELECT * FROM devices";
 $stmtGadgets = $conn->prepare($queryGadgets);
 $stmtGadgets->execute();
 
-$querySolar = "SELECT * FROM solar_installations";
-$stmtSolar = $conn->prepare($querySolar);
-$stmtSolar->execute();
+// $querySolar = "SELECT * FROM solar_installations";
+// $stmtSolar = $conn->prepare($querySolar);
+// $stmtSolar->execute();
 
 // Fetch farms from the database
 $queryFarms = "SELECT * FROM farms"; // Adjust the table name as necessary
@@ -782,10 +782,6 @@ $selected_tab = isset($_GET['tab']) ? $_GET['tab'] : 'gadgets';
                                 </div>
                             </div>
                         <?php endwhile; ?>
-                    <?php else: ?>
-                        <div class="no-gadgets">
-                            <p>No gadgets available at the moment.</p>
-                        </div>
                     <?php endif; ?>
                 </div>
                 <div class="no-results" style="display: none;">

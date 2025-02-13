@@ -2,7 +2,7 @@
 $servername = "localhost";
 $username_db = "root";
 $password_db = "";
-$dbname = "real_estate_db"; // Change to your actual database name
+$dbname = "D.I.S-groups"; // Change to your actual database name
 
 try {
     $conn = new PDO("mysql:host=$servername;dbname=$dbname", $username_db, $password_db);

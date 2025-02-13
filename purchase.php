@@ -57,31 +57,31 @@ $whatsapp_url = "https://wa.me/$admin_phone?text=$whatsapp_message_encoded";
 
 // Process form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $entered_code = trim($_POST['purchase_code']);
-
-    if ($entered_code === $property['purchase_code']) {
-        $buyer_id = $_SESSION['user_id'];
-        $seller_id = $property['user_id'];
-        $amount = $property['price'];
-
-        $stmt = $conn->prepare("INSERT INTO transactions (property_id, buyer_id, seller_id, amount) VALUES (?, ?, ?, ?)");
-        $stmt->bindParam(1, $property_id, PDO::PARAM_INT);
-        $stmt->bindParam(2, $buyer_id, PDO::PARAM_INT);
-        $stmt->bindParam(3, $seller_id, PDO::PARAM_INT);
-        $stmt->bindParam(4, $amount, PDO::PARAM_STR);
-
-        if ($stmt->execute()) {
-            // Update property status to sold
-            $update_stmt = $conn->prepare("UPDATE properties SET status='sold' WHERE id=?");
-            $update_stmt->bindParam(1, $property_id, PDO::PARAM_INT);
-            $update_stmt->execute();
-
-            echo "<div class='container'><div class='alert alert-success'><h3>Purchase Successful!</h3><p>You have successfully purchased the property.</p></div></div>";
-        } else {
-            $errors[] = "Failed to process the purchase. Please try again.";
-        }
-    } else {
-        $errors[] = "Invalid purchase code. Please try again.";
+    try {
+        $conn->beginTransaction();
+        
+        // Update property status and purchaser
+        $updateStmt = $conn->prepare("
+            UPDATE properties 
+            SET status = 'sold',
+                purchaser_id = :user_id,
+                updated_at = NOW()
+            WHERE id = :property_id
+        ");
+        
+        $updateStmt->execute([
+            ':user_id' => $_SESSION['user_id'],
+            ':property_id' => $property_id
+        ]);
+        
+        $conn->commit();
+        $_SESSION['success'] = "Purchase completed successfully!";
+        header("Location: client_dashboard.php");
+        exit();
+        
+    } catch (PDOException $e) {
+        $conn->rollBack();
+        $_SESSION['error'] = "Purchase failed: " . $e->getMessage();
     }
 }
 
@@ -322,14 +322,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <div class="product-details">
             <h2 class="product-title"><?php echo htmlspecialchars($property['title']); ?></h2>
             
-            <div class="media-container" onclick="openModal('uploads/<?php echo htmlspecialchars($property['media']); ?>', '<?php echo $media_ext; ?>')">
-                <?php if ($is_image): ?>
-                    <img src="uploads/properties/<?php echo htmlspecialchars($property['media']); ?>" alt="<?php echo htmlspecialchars($property['title']); ?>">
-                <?php elseif ($is_video): ?>
-                    <video controls>
-                        <source src="uploads/<?php echo htmlspecialchars($property['media']); ?>" type="video/<?php echo $media_ext; ?>">
-                        Your browser does not support the video tag.
-                    </video>
+            <div class="media-container">
+                <?php 
+                $full_path = 'uploads/properties/' . htmlspecialchars($property['media']);
+                echo "<!-- Debug: Trying to load image from: $full_path -->";
+                
+                if ($is_image && file_exists($full_path)): ?>
+                    <img src="<?php echo $full_path; ?>" 
+                         alt="<?php echo htmlspecialchars($property['title']); ?>">
+                <?php else: ?>
+                    <div class="alert alert-warning">Image missing: <?php echo $full_path; ?></div>
                 <?php endif; ?>
             </div>
 
@@ -352,8 +354,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             ?>
                         </p>
                         <?php
-                            $map_query = urlencode(implode(', ', $location));
-                            $maps_url = "https://www.google.com/maps/search/?api=1&query=" . $map_query;
+                            // Update map URL to use IP address
+                            $map_query = urlencode($property['ip_address']);
+                            $maps_url = "https://www.google.com/maps?q=" . $map_query;
                         ?>
                         <a href="<?php echo $maps_url; ?>" target="_blank" class="map-link" title="View on Google Maps">
                             <i class="fas fa-map"></i>

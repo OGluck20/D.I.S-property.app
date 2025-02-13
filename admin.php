@@ -10,11 +10,17 @@ if (!isset($_SESSION['admin_logged_in'])) {
 
 // Get dashboard stats
 try {
+    // Total properties
     $propertyCount = $conn->query("SELECT COUNT(*) FROM properties")->fetchColumn();
+    
+    // Total devices
     $deviceCount = $conn->query("SELECT COUNT(*) FROM devices")->fetchColumn();
-    $solutionCount = $conn->query("SELECT COUNT(*) FROM solutions")->fetchColumn();
+    
+    // Total users
+    $userCount = $conn->query("SELECT COUNT(*) FROM users")->fetchColumn();
+
 } catch(PDOException $e) {
-    $propertyCount = $deviceCount = $solutionCount = 0;
+    $propertyCount = $deviceCount = $userCount = $solutionCount = 0;
 }
 
 $stmt = $conn->query("SELECT id, name, brand, price FROM devices ORDER BY created_at DESC");
@@ -175,6 +181,14 @@ $devices = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 <a href="logout.php" class="nav-link text-danger">
                     <i class="fas fa-sign-out-alt me-2"></i> Logout
                 </a>
+                <a href="#applications" class="nav-link" data-page="applications">
+                    <i class="fas fa-file-contract me-2"></i> Applications
+                    <span class="badge bg-danger ms-2" id="pendingApplicationsCount">0</span>
+                </a>
+                <a href="#notifications" class="nav-link" data-page="notifications">
+                    <i class="fas fa-bell me-2"></i> Notifications
+                    <span class="badge bg-primary ms-2" id="unreadNotificationsCount">0</span>
+                </a>
             </nav>
         </div>
 
@@ -188,6 +202,10 @@ $devices = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 <div class="stat-card">
                     <h3>Devices</h3>
                     <p class="h2"><?php echo $deviceCount; ?></p>
+                </div>
+                <div class="stat-card">
+                    <h3>Users</h3>
+                    <p class="h2"><?php echo $userCount; ?></p>
                 </div>
             </div>
 
@@ -277,6 +295,46 @@ $devices = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 </table>
             </div>
 
+            <div class="table-responsive mt-4">
+                <h2 class="mb-4">Manage Users</h2>
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Username</th>
+                            <th>Email</th>
+                            <th>Role</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php 
+                        $users = $conn->query("SELECT id, username, email, role FROM users")->fetchAll();
+                        foreach ($users as $user): 
+                        ?>
+                            <tr>
+                                <td><?php echo $user['id']; ?></td>
+                                <td><?php echo htmlspecialchars($user['username']); ?></td>
+                                <td><?php echo htmlspecialchars($user['email']); ?></td>
+                                <td><?php echo htmlspecialchars($user['role']); ?></td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary edit-user" 
+                                            data-id="<?php echo $user['id']; ?>"
+                                            data-username="<?php echo htmlspecialchars($user['username']); ?>"
+                                            data-email="<?php echo htmlspecialchars($user['email']); ?>"
+                                            data-role="<?php echo htmlspecialchars($user['role']); ?>">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-danger delete-user" 
+                                            data-id="<?php echo $user['id']; ?>">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
 
             <!-- Update Property Modal -->
             <div class="modal fade" id="propertyModal">
@@ -499,6 +557,42 @@ $devices = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                 <div class="mb-3">
                                     <label class="form-label">Price</label>
                                     <input type="number" id="edit_device_price" name="price" class="form-control" required>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                <button type="submit" class="btn btn-primary">Save Changes</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Edit User Modal -->
+            <div class="modal fade" id="editUserModal">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Edit User</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <form id="editUserForm" action="handler/update_user.php" method="POST">
+                            <div class="modal-body">
+                                <input type="hidden" name="id" id="editUserId">
+                                <div class="mb-3">
+                                    <label class="form-label">Username</label>
+                                    <input type="text" name="username" id="editUsername" class="form-control" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Email</label>
+                                    <input type="email" name="email" id="editEmail" class="form-control" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Role</label>
+                                    <select name="role" id="editRole" class="form-control" required>
+                                        <option value="user">User</option>
+                                        <option value="admin">Admin</option>
+                                    </select>
                                 </div>
                             </div>
                             <div class="modal-footer">
@@ -833,6 +927,85 @@ $devices = $stmt->fetchAll(PDO::FETCH_ASSOC);
                         title: 'Error!',
                         text: error.message
                     });
+                });
+            });
+        });
+
+        // User edit modal handler
+        document.querySelectorAll('.edit-user').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const modal = new bootstrap.Modal(document.getElementById('editUserModal'));
+                document.getElementById('editUserId').value = this.dataset.id;
+                document.getElementById('editUsername').value = this.dataset.username;
+                document.getElementById('editEmail').value = this.dataset.email;
+                document.getElementById('editRole').value = this.dataset.role;
+                modal.show();
+            });
+        });
+
+        // User edit form submission
+        document.getElementById('editUserForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = {
+                id: document.getElementById('editUserId').value,
+                username: document.getElementById('editUsername').value,
+                email: document.getElementById('editEmail').value,
+                role: document.getElementById('editRole').value
+            };
+
+            fetch('handler/update_user.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Updated!',
+                        text: 'User updated successfully',
+                        timer: 1500
+                    }).then(() => location.reload());
+                } else {
+                    Swal.fire('Error!', data.message, 'error');
+                }
+            });
+        });
+
+        // Delete user handler (existing code with error handling)
+        document.querySelectorAll('.delete-user').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const userId = this.dataset.id;
+                Swal.fire({
+                    title: 'Delete User?',
+                    text: "This cannot be undone!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    confirmButtonText: 'Delete'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        fetch('handler/delete_user.php', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({ id: userId })
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                Swal.fire('Deleted!', 'User removed', 'success')
+                                    .then(() => location.reload());
+                            } else {
+                                Swal.fire('Error!', data.message, 'error');
+                            }
+                        });
+                    }
                 });
             });
         });

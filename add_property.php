@@ -24,6 +24,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $city = trim($_POST['city']);
     $state = trim($_POST['state']);
     $zip_code = trim($_POST['zip_code']);
+    $ip_address = trim($_POST['ip_address']);
 
     // Generate a unique purchase code for the property
     $purchase_code = uniqid('purchase_');
@@ -60,7 +61,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if (empty($errors)) {
         // Prepare the SQL statement
-        $stmt = $conn->prepare("INSERT INTO properties (user_id, title, description, price, address, city, state, zip_code, media, purchase_code) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        $stmt = $conn->prepare("INSERT INTO properties (user_id, title, description, price, address, city, state, zip_code, media, purchase_code, ip_address) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
 
         // Bind parameters
         $stmt->bindParam(1, $_SESSION['user_id']);
@@ -73,6 +74,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->bindParam(8, $zip_code);
         $stmt->bindParam(9, $new_filename);
         $stmt->bindParam(10, $purchase_code); // Include the purchase code
+        $stmt->bindParam(11, $ip_address);
 
         // Execute the statement
         if ($stmt->execute()) {
@@ -102,38 +104,76 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <!-- style -->
 <style>
     :root {
-    --primary: #2ecc71;
-    --primary-dark: #27ae60;
-    --secondary: #34495e;
-    --accent: #3498db;
-    --background: #f9fafb;
-    --text: #2c3e50;
-    --shadow: rgba(0, 0, 0, 0.1);
-}
+        --primary: #2ecc71;
+        --primary-dark: #27ae60;
+        --secondary: #34495e;
+        --accent: #3498db;
+        --background: #f9fafb;
+        --text: #2c3e50;
+        --shadow: rgba(0, 0, 0, 0.1);
+    }
+
     .container {
-        padding: 30px 20px;
+        max-width: 800px;
+        margin: 2rem auto;
+        padding: 2rem;
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px var(--shadow);
+    }
+
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
     }
 
     .form-label {
-        font-weight: bold; /* Bold labels */
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+        color: var(--secondary);
     }
 
-    .alert {
-        margin-bottom: 20px; /* Space between alerts and form */
+    .form-control {
+        width: 100%;
+        padding: 0.75rem;
+        border: 2px solid #e2e8f0;
+        border-radius: 6px;
+        transition: border-color 0.3s ease;
     }
 
-    .btn-primary {
-        background-color: #007bff; /* Bootstrap primary color */
-        border: none; /* Remove border */
+    .form-control:focus {
+        border-color: var(--accent);
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
     }
 
-    .btn-primary:hover {
-        background-color: #0056b3; /* Darker blue on hover */
+    .btn{
+        background-color: var(--primary-dark);
+        width: 90%;
+        display: flex;
+        margin: 0 auto;
+        justify-content: center;
+        transition: transform ease 1s;
+    }
+
+    .btn:hover{
+        background-color: var(--primary);
+        transform: scale(0.9);
+    }
+
+    @media (max-width: 768px) {
+        .container {
+            margin: 1rem;
+            padding: 1.5rem;
+        }
     }
 </style>
 
 <div class="container">
-    <h2>Add Property</h2>
+    <h2 class="mb-4">Add New Property</h2>
     <?php if (!empty($errors)): ?>
         <div class="alert alert-danger">
             <ul>
@@ -148,37 +188,46 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
     <?php endif; ?>
     <form action="add_property.php" method="POST" enctype="multipart/form-data">
-        <div class="mb-3">
-            <label for="title" class="form-label">Property Title</label>
-            <input type="text" class="form-control" id="title" name="title" value="<?php echo htmlspecialchars($title); ?>" required>
-        </div>
-        <div class="mb-3">
-            <label for="description" class="form-label">Property Description</label>
-            <textarea class="form-control" id="description" name="description" rows="5" required><?php echo htmlspecialchars($description); ?></textarea>
-        </div>
-        <div class="mb-3">
-            <label for="price" class="form-label">Price (₦)</label>
-            <input type="number" step="0.01" class="form-control" id="price" name="price" value="<?php echo htmlspecialchars($price); ?>" required>
-        </div>
-        <div class="mb-3">
-            <label for="address" class="form-label">Address</label>
-            <input type="text" class="form-control" id="address" name="address" value="<?php echo htmlspecialchars($address); ?>" required>
-        </div>
-        <div class="mb-3">
-            <label for="city" class="form-label">City</label>
-            <input type="text" class="form-control" id="city" name="city" value="<?php echo htmlspecialchars($city); ?>" required>
-        </div>
-        <div class="mb-3">
-            <label for="state" class="form-label">State</label>
-            <input type="text" class="form-control" id="state" name="state" value="<?php echo htmlspecialchars($state); ?>" required>
-        </div>
-        <div class="mb-3">
-            <label for="zip_code" class="form-label">Zip Code</label>
-            <input type="text" class="form-control" id="zip_code" name="zip_code" value="<?php echo htmlspecialchars($zip_code); ?>" required>
-        </div>
-        <div class="mb-3">
-            <label for="media" class="form-label">Property Media (Image/Video)</label>
-            <input type="file" class="form-control" id="media" name="media" accept="image/*,video/*">
+        <div class="form-grid">
+            <div class="form-group">
+                <label for="title" class="form-label">Property Title</label>
+                <input type="text" class="form-control" id="title" name="title" value="<?php echo htmlspecialchars($title); ?>" required>
+            </div>
+            <div class="form-group">
+                <label for="description" class="form-label">Property Description</label>
+                <textarea class="form-control" id="description" name="description" rows="5" required><?php echo htmlspecialchars($description); ?></textarea>
+            </div>
+            <div class="form-group">
+                <label for="price" class="form-label">Price (₦)</label>
+                <input type="number" step="0.01" class="form-control" id="price" name="price" value="<?php echo htmlspecialchars($price); ?>" required>
+            </div>
+            <div class="form-group">
+                <label for="address" class="form-label">Address</label>
+                <input type="text" class="form-control" id="address" name="address" value="<?php echo htmlspecialchars($address); ?>" required>
+            </div>
+            <div class="form-group">
+                <label for="city" class="form-label">City</label>
+                <input type="text" class="form-control" id="city" name="city" value="<?php echo htmlspecialchars($city); ?>" required>
+            </div>
+            <div class="form-group">
+                <label for="state" class="form-label">State</label>
+                <input type="text" class="form-control" id="state" name="state" value="<?php echo htmlspecialchars($state); ?>" required>
+            </div>
+            <div class="form-group">
+                <label for="zip_code" class="form-label">Zip Code</label>
+                <input type="text" class="form-control" id="zip_code" name="zip_code" value="<?php echo htmlspecialchars($zip_code); ?>" required>
+            </div>
+            <div class="form-group">
+                <label for="ip_address" class="form-label">Property Location (IP Address)</label>
+                <input type="text" class="form-control" id="ip_address" name="ip_address" 
+                       pattern="^((\d{1,3}\.){3}\d{1,3})$" 
+                       title="Enter valid IPv4 address (e.g., 192.168.0.1)"
+                       required>
+            </div>
+            <div class="form-group">
+                <label for="media" class="form-label">Property Media (Image/Video)</label>
+                <input type="file" class="form-control" id="media" name="media" accept="image/*,video/*">
+            </div>
         </div>
         <button type="submit" class="btn btn-primary">Add Property</button>
     </form>

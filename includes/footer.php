@@ -109,10 +109,10 @@
             <h3>About D.I.S</h3>
             <p>Innovative solutions for Properties, Technology, and Agriculture.</p>
             <div class="social-links">
-                <a href="#"><i class="fab fa-facebook"></i></a>
-                <a href="#"><i class="fab fa-twitter"></i></a>
-                <a href="#"><i class="fab fa-linkedin"></i></a>
-                <a href="#"><i class="fab fa-instagram"></i></a>
+                <a href="https://www.facebook.com/share/14zKFzVXV8"><i class="fab fa-facebook"></i></a>
+                <a href="https://x.com/disrealty360?t=Mwz3Q8yLXzW7nf2nSH9H9w&s=09"><i class="fab fa-twitter"></i></a>
+                <a href="https://www.linkedin.com/company/dis-realty-360/"><i class="fab fa-linkedin"></i></a>
+                <a href="https://www.instagram.com/disrealty360?igsh=eW5tb2ExcWVwNHM3"><i class="fab fa-instagram"></i></a>
             </div>
         </div>
 
@@ -121,13 +121,15 @@
             <h3>Quick Links</h3>
             <ul class="quick-links">
                 <li class="nav-item">
-                    <a class="nav-link" href="dashboard.php?tab=solutions">DIS Solutions</a>
+                    <a class="nav-link" href="<?php echo isset($_SESSION['user_id']) ? 'dashboard.php?tab=properties' : 'login.php'; ?>">DIS Realty</a>
                 </li>
+
                 <li class="nav-item">
-                    <a class="nav-link" href="dashboard.php?tab=properties">DIS Properties</a>
+                    <a class="nav-link" href="<?php echo isset($_SESSION['user_id']) ? 'dashboard.php?tab=solutions' : 'login.php'; ?>">DIS Solutions</a>
                 </li>
+
                 <li class="nav-item">
-                    <a class="nav-link" href="dashboard.php?tab=farms">DIS Farms</a>
+                    <a class="nav-link" href="<?php echo isset($_SESSION['user_id']) ? 'dashboard.php?tab=farms' : 'login.php'; ?>">DIS Farms</a>
                 </li>
             </ul>
         </div>
@@ -138,15 +140,15 @@
             <div class="contact-info">
                 <div class="contact-item">
                     <i class="fas fa-map-marker-alt"></i>
-                    <span>123 Business Street, City, Country</span>
+                    <span>3rd floor, Opic tower, Oke ilewo Abeokuta, Ogun state Nigeria</span>
                 </div>
                 <div class="contact-item">
                     <i class="fas fa-phone"></i>
-                    <span>+1 234 567 890</span>
+                    <span>+2349013020302</span>
                 </div>
                 <div class="contact-item">
                     <i class="fas fa-envelope"></i>
-                    <span>info@dis-group.com</span>
+                    <span>disrealty360@gmail.com</span>
                 </div>
             </div>
         </div>

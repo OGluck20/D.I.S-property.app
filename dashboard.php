@@ -659,6 +659,41 @@ $selected_tab = isset($_GET['tab']) ? $_GET['tab'] : 'gadgets';
         background: #128C7E;
         color: white;
     }
+
+    .service-features {
+    list-style: none;
+    padding: 0;
+    margin: 1rem 0;
+}
+
+.service-features li {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.service-features li i {
+    color: var(--primary);
+}
+
+.solution-card {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.solution-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.solution-content .btn-whatsapp {
+    margin-top: auto;
+}
 </style>
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -666,7 +701,7 @@ $selected_tab = isset($_GET['tab']) ? $_GET['tab'] : 'gadgets';
 <div class="main-container">
     <div class="tab-content">
         <?php if ($selected_tab === 'solutions'): ?>
-            <div class="tab-pane fade show active" id="gadgets">
+            <div class="tab-pane fade show active" id="solutions">
                 <h2>Available Gadgets</h2>
                 
                 <!-- Brand Filter -->
@@ -682,6 +717,14 @@ $selected_tab = isset($_GET['tab']) ? $_GET['tab'] : 'gadgets';
                         <div class="brand-item" data-brand="Samsung">
                             <i class="fab fa-samsung"></i>
                             <span>Samsung</span>
+                        </div>
+                        <div class="brand-item" data-brand="Infinix">
+                            <i class="fas fa-mobile-alt"></i>
+                            <span>Infinix</span>
+                        </div>
+                        <div class="brand-item" data-brand="Itel">
+                            <i class="fas fa-mobile-alt"></i>
+                            <span>Itel</span>
                         </div>
                         <div class="brand-item" data-brand="Google">
                             <i class="fab fa-android"></i>
@@ -743,6 +786,12 @@ $selected_tab = isset($_GET['tab']) ? $_GET['tab'] : 'gadgets';
                                             case 'google':
                                                 $brandIcon = 'fab fa-google';
                                                 break;
+                                            case 'infinix':
+                                                $brandIcon = 'fas fa-mobile-alt';
+                                                break;
+                                            case 'itel':
+                                                $brandIcon = 'fas fa-mobile-alt';
+                                                break;
                                             case 'oneplus':
                                                 $brandIcon = 'fa fa-mobile-alt';
                                                 break;
@@ -773,7 +822,7 @@ $selected_tab = isset($_GET['tab']) ? $_GET['tab'] : 'gadgets';
                                     </div>
                                     <div class="gadget-actions">
                                         <!-- <button class="btn-action btn-details">View Details</button> -->
-                                        <a href="https://wa.me/+2347060592446?text=I'm%20interested%20in%20buying%20<?php echo urlencode($gadget['name']); ?>%20for%20₦<?php echo number_format($gadget['price'], 2); ?>" 
+                                        <a href="https://wa.me/+2349013020302?text=I'm%20interested%20in%20buying%20<?php echo urlencode($gadget['name']); ?>%20for%20₦<?php echo number_format($gadget['price'], 2); ?>" 
                                            class="btn-whatsapp-buy" 
                                            target="_blank">
                                             <i class="fab fa-whatsapp"></i> Buy Now
@@ -841,12 +890,6 @@ $selected_tab = isset($_GET['tab']) ? $_GET['tab'] : 'gadgets';
                         <div class="col-md-6">
                             <h2 class="section-title">Available Properties</h2>
                         </div>
-                        <div class="col-md-6">
-                            <div class="search-filter">
-                                <input type="text" class="form-control" placeholder="Search properties...">
-                                <i class="fas fa-search search-icon"></i>
-                            </div>
-                        </div>
                     </div>
                 </div>
 
@@ -888,12 +931,14 @@ $selected_tab = isset($_GET['tab']) ? $_GET['tab'] : 'gadgets';
                                             ?>
                                         </p>
                                         <div class="property-actions">
-                                            <a href="purchase.php?id=<?php echo $property['id']; ?>" class="btn btn-primary">
+                                            <a href="purchase.php?id=<?php echo $property['id']; ?>" class="btn btn-success">
                                                 <i class="fas fa-eye"></i> View Details
                                             </a>
-                                            <a href="purchase.php?id=<?php echo $property['id']; ?>" class="btn btn-success">
-                                                <i class="fas fa-shopping-cart"></i> Purchase
-                                            </a>
+                                            <button class="btn btn-primary share-property" 
+                                                data-title="<?php echo htmlspecialchars($property['title']); ?>"
+                                                data-url="<?php echo "http://$_SERVER[HTTP_HOST]/property.php?id=" . $property['id']; ?>">
+                                                <i class="fas fa-share-alt"></i> Share
+                                            </button>
                                         </div>
                                     </div>
                                 </div>
@@ -907,6 +952,119 @@ $selected_tab = isset($_GET['tab']) ? $_GET['tab'] : 'gadgets';
                             </div>
                         </div>
                     <?php endif; ?>
+                </div>
+                <!-- Specialized Services Section -->
+                <h2 style="margin-top: 5rem; text-align: center;">Specialized Land & Legal Services</h2>
+                <div class="row mt-4">
+                    <!-- Land Surveying -->
+                    <div class="col-lg-4 mb-4">
+                        <div class="solution-card">
+                            <div class="solution-image">
+                                <img src="assets/images/survey.jpg" alt="Land Surveying">
+                            </div>
+                            <div class="solution-content">
+                                <span class="solution-type">Land Surveying</span>
+                                <h3 class="solution-title">Professional Survey Services</h3>
+                                <ul class="service-features">
+                                    <li><i class="fas fa-check"></i> Boundary surveys</li>
+                                    <li><i class="fas fa-check"></i> Topographical surveys</li>
+                                    <li><i class="fas fa-check"></i> Estate layout design</li>
+                                </ul>
+                                <a href="https://wa.me/+2349013020302?text=I'm%20interested%20in%20land%20surveying%20services" 
+                                class="btn-whatsapp" target="_blank">
+                                    <i class="fab fa-whatsapp"></i> Get Quote
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Title Verification -->
+                    <div class="col-lg-4 mb-4">
+                        <div class="solution-card">
+                            <div class="solution-image">
+                                <img src="assets/images/document-verification.jpg" alt="Title Verification">
+                            </div>
+                            <div class="solution-content">
+                                <span class="solution-type">Title Verification</span>
+                                <h3 class="solution-title">Documentation & Verification</h3>
+                                <ul class="service-features">
+                                    <li><i class="fas fa-check"></i> Ownership verification</li>
+                                    <li><i class="fas fa-check"></i> Encumbrance checks</li>
+                                    <li><i class="fas fa-check"></i> C of O assistance</li>
+                                </ul>
+                                <a href="https://wa.me/+2349013020302?text=I'm%20interested%20in%20title%20verification%20services" 
+                                class="btn-whatsapp" target="_blank">
+                                    <i class="fab fa-whatsapp"></i> Get Quote
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Land Recovery -->
+                    <div class="col-lg-4 mb-4">
+                        <div class="solution-card">
+                            <div class="solution-image">
+                                <img src="assets/images/land-location.jpg" alt="Land Recovery">
+                            </div>
+                            <div class="solution-content">
+                                <span class="solution-type">Land Recovery</span>
+                                <h3 class="solution-title">Lost Land Tracing</h3>
+                                <ul class="service-features">
+                                    <li><i class="fas fa-check"></i> Land location services</li>
+                                    <li><i class="fas fa-check"></i> Encroachment resolution</li>
+                                    <li><i class="fas fa-check"></i> Authority liaison</li>
+                                </ul>
+                                <a href="https://wa.me/+2349013020302?text=I'm%20interested%20in%20land%20recovery%20services" 
+                                class="btn-whatsapp" target="_blank">
+                                    <i class="fab fa-whatsapp"></i> Get Quote
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Regularization -->
+                    <div class="col-lg-4 mb-4">
+                        <div class="solution-card">
+                            <div class="solution-image">
+                                <img src="assets/images/nigeria-certificate-of-occupancy.jpg" alt="Land Regularization">
+                            </div>
+                            <div class="solution-content">
+                                <span class="solution-type">Regularization</span>
+                                <h3 class="solution-title">Title Registration Services</h3>
+                                <ul class="service-features">
+                                    <li><i class="fas fa-check"></i> Government registration</li>
+                                    <li><i class="fas fa-check"></i> Title conversion</li>
+                                    <li><i class="fas fa-check"></i> Documentation</li>
+                                </ul>
+                                <a href="https://wa.me/+2349013020302?text=I'm%20interested%20in%20land%20regularization%20services" 
+                                class="btn-whatsapp" target="_blank">
+                                    <i class="fab fa-whatsapp"></i> Get Quote
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Property Valuation -->
+                    <div class="col-lg-4 mb-4">
+                        <div class="solution-card">
+                            <div class="solution-image">
+                                <img src="assets/images/valuation.jpg" alt="Property Valuation">
+                            </div>
+                            <div class="solution-content">
+                                <span class="solution-type">Property Valuation</span>
+                                <h3 class="solution-title">Professional Valuation Services</h3>
+                                <ul class="service-features">
+                                    <li><i class="fas fa-check"></i> Market value assessment</li>
+                                    <li><i class="fas fa-check"></i> Collateral valuation</li>
+                                    <li><i class="fas fa-check"></i> Sale price determination</li>
+                                </ul>
+                                <a href="https://wa.me/+2349013020302?text=I'm%20interested%20in%20property%20valuation%20services" 
+                                class="btn-whatsapp" target="_blank">
+                                    <i class="fab fa-whatsapp"></i> Get Quote
+                                </a>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         <?php elseif ($selected_tab === 'farms'): ?>
@@ -924,7 +1082,7 @@ $selected_tab = isset($_GET['tab']) ? $_GET['tab'] : 'gadgets';
                                         <p class="card-text"><strong>Price:</strong> ₦<?php echo number_format($farm['price'], 2); ?></p>
                                         <?php
                                         $whatsapp_message = "Hi, I'm interested in booking a visit for the " . $farm['name'] . " listed at ₦" . number_format($farm['price'], 2);
-                                        $whatsapp_url = "https://wa.me/+2348078123476?text=" . urlencode($whatsapp_message);
+                                        $whatsapp_url = "https://wa.me/+2349013020302?text=" . urlencode($whatsapp_message);
                                         ?>
                                         <a href="<?php echo $whatsapp_url; ?>" class="book-visit-btn" target="_blank">
                                             <i class="fab fa-whatsapp"></i> Book Visit
@@ -943,7 +1101,7 @@ $selected_tab = isset($_GET['tab']) ? $_GET['tab'] : 'gadgets';
 </div>
 
 <script>
-
+    
 document.addEventListener('DOMContentLoaded', function() {
     const filterButtons = document.querySelectorAll('.brand-item');
     const gadgetCards = document.querySelectorAll('.gadget-card');
@@ -985,7 +1143,69 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Initial filter
     document.querySelector('.brand-item.active').click();
-});
-</script>
 
+
+    // Initialize only if elements exist
+    const editDeviceButtons = document.querySelectorAll('.edit-device');
+    if (editDeviceButtons.length > 0) {
+        editDeviceButtons.forEach(btn => {
+            btn.addEventListener('click', handleDeviceEdit);
+        });
+    }
+});
+
+// Alternative: Event delegation for dynamic elements
+document.body.addEventListener('click', function(e) {
+    if (e.target.closest('.edit-device')) {
+        handleDeviceEdit(e);
+    }
+    if (e.target.closest('.delete-device')) {
+        handleDeviceDelete(e);
+    }
+});
+
+// Add to your existing script section in dashboard.php
+document.addEventListener('DOMContentLoaded', function() {
+    // Handle property sharing
+    document.querySelectorAll('.share-property').forEach(button => {
+        button.addEventListener('click', function() {
+            const title = this.dataset.title;
+            const url = this.dataset.url;
+
+            if (navigator.share) {
+                // Use Web Share API if available
+                navigator.share({
+                    title: title,
+                    url: url
+                }).catch(console.error);
+            } else {
+                // Fallback to clipboard copy
+                const tempInput = document.createElement('input');
+                document.body.appendChild(tempInput);
+                tempInput.value = url;
+                tempInput.select();
+                document.execCommand('copy');
+                document.body.removeChild(tempInput);
+
+                // Show success message
+                showAlert('Success', 'Link copied to clipboard!', 'success');
+            }
+        });
+    });
+});
+
+// Add alert function if not already present
+function showAlert(title, message, type) {
+    Swal.fire({
+        title: title,
+        text: message,
+        icon: type,
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 3000
+    });
+}
+</script>
+<?php include 'includes/whatsapp_float.php'; ?>
 <?php include 'includes/footer.php'; ?>

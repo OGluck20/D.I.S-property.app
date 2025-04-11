@@ -21,7 +21,12 @@ $property_id = intval($_GET['id']);
 $errors = [];
 
 // Fetch property and user data
-$stmt = $conn->prepare("SELECT properties.*, users.username FROM properties JOIN users ON properties.user_id = users.id WHERE properties.id = ?");
+$stmt = $conn->prepare("
+    SELECT properties.*, users.firstname, users.lastname 
+    FROM properties 
+    JOIN users ON properties.user_id = users.id 
+    WHERE properties.id = ?
+");
 $stmt->bindParam(1, $property_id, PDO::PARAM_INT);
 $stmt->execute();
 $property = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -45,7 +50,7 @@ if ($property['status'] !== 'available') {
 }
 
 // WhatsApp redirection
-$admin_phone = '+2349035286982'; // Ensure the admin phone is set correctly
+$admin_phone = '+2349013020302'; // Ensure the admin phone is set correctly
 
 $whatsapp_message = "Property Inquiry:\n\n"
     . "Title: " . htmlspecialchars($property['title']) . "\n"
@@ -354,8 +359,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             ?>
                         </p>
                         <?php
-                            // Update map URL to use IP address
-                            $map_query = urlencode($property['ip_address']);
+                            // Create map URL using property address
+                            $location = array_filter([
+                                $property['address'],
+                                $property['city'],
+                                $property['state']
+                            ]);
+                            $map_query = urlencode(implode(', ', $location));
                             $maps_url = "https://www.google.com/maps?q=" . $map_query;
                         ?>
                         <a href="<?php echo $maps_url; ?>" target="_blank" class="map-link" title="View on Google Maps">
@@ -419,4 +429,5 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         document.getElementById("mediaModal").style.display = "none";
     }
 </script>
+<?php include 'includes/whatsapp_float.php'; ?>
 <?php include 'includes/footer.php'; ?>

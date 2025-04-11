@@ -1,25 +1,30 @@
 <?php
-session_start();
 require_once '../includes/db.php';
-
-// Verify admin
-if (!isset($_SESSION['admin_logged_in'])) {
-    http_response_code(403);
-    die(json_encode(['success' => false, 'message' => 'Unauthorized']));
-}
-
-$data = json_decode(file_get_contents('php://input'), true);
+header('Content-Type: application/json');
 
 try {
-    $stmt = $conn->prepare("DELETE FROM users WHERE id = ?");
-    $stmt->execute([$data['id']]);
+    $userId = $_POST['id'] ?? null;
     
-    echo json_encode(['success' => true]);
-    
-} catch(PDOException $e) {
-    error_log("User delete error: " . $e->getMessage());
+    if (!$userId) {
+        throw new Exception('User ID is required');
+    }
+
+    $stmt = $conn->prepare("DELETE FROM users WHERE id = ? AND role != 'admin'");
+    $result = $stmt->execute([$userId]);
+
+    if ($stmt->rowCount() === 0) {
+        throw new Exception('User not found or cannot be deleted');
+    }
+
     echo json_encode([
-        'success' => false, 
-        'message' => 'Database error: ' . $e->getMessage()
+        'success' => true,
+        'message' => 'User deleted successfully'
     ]);
-} 
+
+} catch (Exception $e) {
+    http_response_code(400);
+    echo json_encode([
+        'success' => false,
+        'message' => $e->getMessage()
+    ]);
+}

@@ -1,64 +1,49 @@
 <?php
-session_start();
 require_once '../includes/db.php';
-
 header('Content-Type: application/json');
 
 try {
-    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-        throw new Exception('Invalid request method');
-    }
-
-    $name = $_POST['name'];
-    $brand = $_POST['brand'];
-    $ram = $_POST['ram'];
-    $storage = $_POST['storage'];
-    $price = $_POST['price'];
+    $data = json_decode(file_get_contents('php://input'), true);
     
-    // Handle image upload
-    $target_dir = "../uploads/devices/";
-    
-    // Create directory if it doesn't exist
-    if (!file_exists($target_dir)) {
-        mkdir($target_dir, 0777, true);
-    }
-
     // Handle file upload
-    if (isset($_FILES["image"]) && $_FILES["image"]["error"] == 0) {
-        $file_name = time() . '_' . basename($_FILES["image"]["name"]);
-        $target_file = $target_dir . $file_name;
-        
-        if (!move_uploaded_file($_FILES["image"]["tmp_name"], $target_file)) {
-            throw new Exception('Failed to upload file');
-        }
-    } else {
-        $file_name = ''; // No image uploaded
+    $targetDir = "../uploads/devices/";
+    if (!file_exists($targetDir)) {
+        mkdir($targetDir, 0777, true);
     }
+
+    $media = '';
+    if (isset($_FILES['media']) && $_FILES['media']['error'] === UPLOAD_ERR_OK) {
+        $fileName = time() . '_' . basename($_FILES['media']['name']);
+        $targetPath = $targetDir . $fileName;
+        
+        if (move_uploaded_file($_FILES['media']['tmp_name'], $targetPath)) {
+            $media = $fileName;
+        } else {
+            throw new Exception('Failed to upload image.');
+        }
+    }
+
+    $stmt = $conn->prepare("
+        INSERT INTO devices (name, brand, ram, storage, price, media, created_at) 
+        VALUES (?, ?, ?, ?, ?, ?, NOW())
+    ");
     
-    $sql = "INSERT INTO devices (name, brand, ram, storage, price, media) 
-            VALUES (:name, :brand, :ram, :storage, :price, :media)";
-    
-    $stmt = $conn->prepare($sql);
     $result = $stmt->execute([
-        'name' => $name,
-        'brand' => $brand,
-        'ram' => $ram,
-        'storage' => $storage,
-        'price' => $price,
-        'media' => $file_name
+        $_POST['name'],
+        $_POST['brand'],
+        $_POST['ram'],
+        $_POST['storage'],
+        $_POST['price'],
+        $media
     ]);
 
     if ($result) {
-        echo json_encode([
-            'success' => true,
-            'message' => 'Device added successfully'
-        ]);
+        echo json_encode(['success' => true]);
     } else {
         throw new Exception('Failed to add device');
     }
 
 } catch (Exception $e) {
-    http_response_code(400);
     echo json_encode([
         'success' => false,
         'message' => $e->getMessage()

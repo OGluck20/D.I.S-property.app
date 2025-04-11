@@ -1,31 +1,65 @@
 <?php
-session_start();
 require_once '../includes/db.php';
-
 header('Content-Type: application/json');
 
 try {
-    $id = $_POST['id'];
-    $name = $_POST['name'];
-    $brand = $_POST['brand'];
-    $price = $_POST['price'];
+    $id = $_POST['id'] ?? null;
+    if (!$id) {
+        throw new Exception('Device ID is required');
+    }
 
-    $sql = "UPDATE devices SET name = :name, brand = :brand, price = :price WHERE id = :id";
+    // Handle file upload if new image is provided
+    $media = null;
+    if (isset($_FILES['media']) && $_FILES['media']['error'] === UPLOAD_ERR_OK) {
+        $targetDir = "../uploads/devices/";
+        if (!file_exists($targetDir)) {
+            mkdir($targetDir, 0777, true);
+        }
+
+        $fileName = time() . '_' . basename($_FILES['media']['name']);
+        $targetPath = $targetDir . $fileName;
+        
+        if (move_uploaded_file($_FILES['media']['tmp_name'], $targetPath)) {
+            $media = $fileName;
+        } else {
+            throw new Exception('Failed to upload image');
+        }
+    }
+
+    // Prepare the update query
+    $sql = "UPDATE devices SET 
+            name = ?, 
+            brand = ?, 
+            ram = ?, 
+            storage = ?, 
+            price = ?";
+    $params = [
+        $_POST['name'],
+        $_POST['brand'],
+        $_POST['ram'],
+        $_POST['storage'],
+        $_POST['price']
+    ];
+
+    // Add media to update if new file was uploaded
+    if ($media) {
+        $sql .= ", media = ?";
+        $params[] = $media;
+    }
+
+    $sql .= " WHERE id = ?";
+    $params[] = $id;
+
     $stmt = $conn->prepare($sql);
-    $result = $stmt->execute([
-        'id' => $id,
-        'name' => $name,
-        'brand' => $brand,
-        'price' => $price
-    ]);
+    $result = $stmt->execute($params);
 
-    echo json_encode([
-        'success' => true,
-        'message' => 'Device updated successfully'
-    ]);
+    if ($result) {
+        echo json_encode(['success' => true]);
+    } else {
+        throw new Exception('Failed to update device');
+    }
 
 } catch (Exception $e) {
-    http_response_code(400);
     echo json_encode([
         'success' => false,
         'message' => $e->getMessage()

@@ -1,0 +1,15 @@
+{
+    "name": "user/d.i.s-property.app",
+    "autoload": {
+        "psr-4": {
+            "User\\DISPropertyApp\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "daniel gbenga",
+            "email": "daniel.357.ogd@gmail.com"
+        }
+    ],
+    "require": {}
+}

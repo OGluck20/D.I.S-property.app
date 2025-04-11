@@ -209,15 +209,63 @@ $devices = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 </div>
             </div>
 
-            <!-- Replace action buttons with modal triggers -->
-            <div class="action-buttons">
-                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#propertyModal">
-                    <i class="fas fa-plus"></i> Add Property
-                </button>
-                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#deviceModal">
-                    <i class="fas fa-plus"></i> Add Device
-                </button>
-            </div>
+            <!-- Content Sections -->
+            <!-- Update the dashboard-content section in admin.php -->
+            <div id="dashboard-content" class="content-section">
+                <div class="dashboard-overview">
+                    <!-- Welcome Section -->
+                    <div class="welcome-section mb-4">
+                        <h2>Welcome, Admin</h2>
+                        <p class="text-muted">Here's what's happening today</p>
+                    </div>
+
+                    <!-- Recent Activities -->
+                    <div class="row mb-4">
+                        <div class="col-md-8">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5>Recent Activities</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table class="table">
+                                            <thead>
+                                                <tr>
+                                                    <th>Action</th>
+                                                    <th>User</th>
+                                                    <th>Time</th>
+                                                    <th>Status</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <?php
+                                                // Fetch recent activities
+                                                $stmt = $conn->query("
+                                                    SELECT a.*, u.username 
+                                                    FROM activities a 
+                                                    LEFT JOIN users u ON a.user_id = u.id 
+                                                    ORDER BY a.created_at DESC 
+                                                    LIMIT 5
+                                                ");
+                                                while ($activity = $stmt->fetch(PDO::FETCH_ASSOC)):
+                                                ?>
+                                                <tr>
+                                                    <td><?php echo htmlspecialchars($activity['action']); ?></td>
+                                                    <td><?php echo htmlspecialchars($activity['username']); ?></td>
+                                                    <td><?php echo date('M d, H:i', strtotime($activity['created_at'])); ?></td>
+                                                    <td>
+                                                        <span class="badge bg-<?php echo $activity['status'] == 'completed' ? 'success' : 'warning'; ?>">
+                                                            <?php echo ucfirst($activity['status']); ?>
+                                                        </span>
+                                                    </td>
+                                                </tr>
+                                                <?php endwhile; ?>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
 
             <div class="table-responsive">
                  <h2 class="mb-4">Manage Devices</h2>
@@ -335,6 +383,57 @@ $devices = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     </tbody>
                 </table>
             </div>
+
+            <div id="devices-content" class="content-section" style="display: none;">
+                <!-- Devices management content -->
+                <h2>Manage Devices</h2>
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Brand</th>
+                            <th>Price</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($devices as $device): ?>
+                            <tr>
+                                <td><?php echo htmlspecialchars($device['name']); ?></td>
+                                <td><?php echo htmlspecialchars($device['brand']); ?></td>
+                                <td>₦<?php echo number_format($device['price'], 2); ?></td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary edit-device" data-id="<?php echo $device['id']; ?>">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-danger delete-device" data-id="<?php echo $device['id']; ?>">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                 </table>
+            </div>
+
+            <div id="notifications-content" class="content-section" style="display: none;">
+                <!-- Notifications content -->
+                <h2>Notifications</h2>
+                <div class="notifications-list">
+                    <!-- Notifications will be loaded here -->
+                </div>
+            </div>
+
+            <!-- Replace action buttons with modal triggers -->
+            <div class="action-buttons">
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#propertyModal">
+                    <i class="fas fa-plus"></i> Add Property
+                </button>
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#deviceModal">
+                    <i class="fas fa-plus"></i> Add Device
+                </button>
+            </div>
+
 
             <!-- Update Property Modal -->
             <div class="modal fade" id="propertyModal">
@@ -1009,6 +1108,271 @@ $devices = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 });
             });
         });
+
+    document.addEventListener('DOMContentLoaded', function() {
+    // Show dashboard content by default
+    showContent('dashboard');
+
+        // Handle navigation clicks
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const page = this.getAttribute('data-page');
+                
+                // Update active state
+                document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                this.classList.add('active');
+                
+                // Show corresponding content
+                showContent(page);
+            });
+        });
+    });
+
+    function showContent(page) {
+        // Hide all content sections
+        document.querySelectorAll('.content-section').forEach(section => {
+            section.style.display = 'none';
+        });
+        
+        // Always hide stats grid first
+        const statsGrid = document.querySelector('.stats-grid');
+        if (statsGrid) {
+            statsGrid.style.display = 'none';
+        }
+        
+        // Show selected content
+        const contentElement = document.getElementById(`${page}-content`);
+        if (contentElement) {
+            contentElement.style.display = 'block';
+            
+            // Show stats grid only for dashboard
+            if (page === 'dashboard' && statsGrid) {
+                statsGrid.style.display = 'grid';
+            }
+        }
+    }
+
+    // Content loading functions
+    function loadProperties() {
+        const propertiesContent = document.getElementById('properties-content');
+        if (propertiesContent) {
+            propertiesContent.style.display = 'block';
+        }
+    }
+
+    function loadUsers() {
+        const usersContent = document.getElementById('users-content');
+        if (usersContent) {
+            usersContent.style.display = 'block';
+        }
+    }
+
+    function loadDevices() {
+        const devicesContent = document.getElementById('devices-content');
+        if (devicesContent) {
+            devicesContent.style.display = 'block';
+        }
+    }
+
+    function loadNotifications() {
+        const notificationsContent = document.getElementById('notifications-content');
+        if (notificationsContent) {
+            notificationsContent.style.display = 'block';
+        }
+    }
+
+        // Add this to your existing script section in admin.php
+    document.addEventListener('DOMContentLoaded', function() {
+        // Function to update unread count
+        function updateUnreadCount() {
+            fetch('handler/notifications.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: 'action=get_unread_count'
+            })
+            .then(response => response.json())
+            .then(data => {
+                const badge = document.getElementById('unreadNotificationsCount');
+                badge.textContent = data.count;
+                badge.style.display = data.count > 0 ? 'inline' : 'none';
+            });
+        }
+
+        // Update count every 30 seconds
+        setInterval(updateUnreadCount, 30000);
+        updateUnreadCount(); // Initial count
+
+        // Mark single notification as read
+        document.querySelectorAll('.notification-item.unread').forEach(item => {
+            item.addEventListener('click', function() {
+                const notificationId = this.dataset.id;
+                fetch('handler/notifications.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `action=mark_read&id=${notificationId}`
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        this.classList.remove('unread');
+                        updateUnreadCount();
+                    }
+                });
+            });
+        });
+
+        // Mark all as read
+        document.querySelector('.mark-all-read').addEventListener('click', function() {
+            fetch('handler/notifications.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: 'action=mark_all_read'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    document.querySelectorAll('.notification-item.unread').forEach(item => {
+                        item.classList.remove('unread');
+                    });
+                    updateUnreadCount();
+                }
+            });
+        });
+    });
+
+    // Add this to your existing script section
+document.addEventListener('DOMContentLoaded', function() {
+    // Prepare the data
+    const weeklyData = <?php echo json_encode($weeklyRevenue); ?>;
+    const monthlyData = <?php echo json_encode($monthlyRevenue); ?>;
+    const yearlyData = <?php echo json_encode($yearlyRevenue); ?>;
+    
+    // Initialize the chart
+    const ctx = document.getElementById('revenueChart').getContext('2d');
+    let revenueChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: [],
+            datasets: [{
+                label: 'Revenue (₦)',
+                data: [],
+                borderColor: '#2ecc71',
+                tension: 0.1,
+                fill: false
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return '₦' + value.toLocaleString();
+                        }
+                    }
+                }
+            },
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return '₦' + context.parsed.y.toLocaleString();
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    // Function to update chart data
+    function updateChart(period) {
+        let data;
+        switch(period) {
+            case 'week':
+                data = weeklyData;
+                break;
+            case 'month':
+                data = monthlyData;
+                break;
+            case 'year':
+                data = yearlyData;
+                break;
+        }
+
+        revenueChart.data.labels = data.map(item => item.date);
+        revenueChart.data.datasets[0].data = data.map(item => item.total);
+        revenueChart.update();
+    }
+
+    // Initialize with weekly data
+    updateChart('week');
+
+    // Handle period button clicks
+    document.querySelectorAll('[data-period]').forEach(button => {
+        button.addEventListener('click', function() {
+            // Update active state
+            document.querySelectorAll('[data-period]').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            this.classList.add('active');
+            
+            // Update chart
+            updateChart(this.dataset.period);
+        });
+    });
+});
+// Add this to your existing script section
+document.addEventListener('DOMContentLoaded', function() {
+    // Set application ID when upload button is clicked
+    document.querySelectorAll('.upload-document').forEach(button => {
+        button.addEventListener('click', function() {
+            document.getElementById('application_id').value = this.dataset.id;
+        });
+    });
+
+    // Handle document upload
+    document.getElementById('uploadDocumentForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        let formData = new FormData(this);
+        
+        fetch('handler/upload_document.php', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success!',
+                    text: 'Document uploaded successfully',
+                    timer: 2000
+                }).then(() => {
+                    location.reload();
+                });
+            } else {
+                throw new Error(data.message);
+            }
+        })
+        .catch(error => {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error!',
+                text: error.message
+            });
+        });
+    });
+});
     </script>
 </body>
 </html>

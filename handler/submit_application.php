@@ -1,17 +1,48 @@
 <?php
+session_start();
+require_once '../includes/db.php';
 
-$stmt = $conn->prepare("
-    INSERT INTO applications 
-    (user_id, property_id, application_type, message, applied_at)
-    VALUES (?, ?, ?, ?, NOW())
-");
+header('Content-Type: application/json');
 
-$applicationType = $data['application_type'];
-$message = "I want to apply for $applicationType for property ID: " . $data['property_id'];
+try {
+    if (!isset($_SESSION['user_id'])) {
+        throw new Exception('User not authenticated');
+    }
 
-$stmt->execute([
-    $_SESSION['user_id'],
-    $data['property_id'],
-    $applicationType,
-    $message
-]); 
+    $data = json_decode(file_get_contents('php://input'), true);
+    
+    // Validate required data
+    if (!isset($data['propertyId'], $data['serviceType'], $data['amount'], $data['reference'])) {
+        throw new Exception('Missing required data');
+    }
+
+    $stmt = $conn->prepare("
+        INSERT INTO service_applications 
+        (user_id, property_id, service_type, amount, reference_code) 
+        VALUES (?, ?, ?, ?, ?)
+    ");
+
+    $result = $stmt->execute([
+        $_SESSION['user_id'],
+        $data['propertyId'],
+        $data['serviceType'],
+        $data['amount'],
+        $data['reference']
+    ]);
+
+    if ($result) {
+        echo json_encode([
+            'success' => true,
+            'message' => 'Application submitted successfully'
+        ]);
+    } else {
+        throw new Exception('Failed to submit application');
+    }
+
+} catch (Exception $e) {
+    http_response_code(400);
+    echo json_encode([
+        'success' => false,
+        'message' => $e->getMessage()
+    ]);
+}

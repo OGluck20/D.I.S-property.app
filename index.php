@@ -32,17 +32,6 @@ if (session_status() === PHP_SESSION_NONE) {
         overflow: hidden;
     }
 
-    .hero::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: url('path/to/pattern.svg');
-        opacity: 0.1;
-        z-index: 1;
-    }
 
     /* Update Hero Content text color */
     .hero-content {
